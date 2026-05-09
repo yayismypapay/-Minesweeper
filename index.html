@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f6f3ee" />
   <meta name="description" content="A clean study planner with schedule, homework, notes, Pomodoro timer, reminders, and study statistics." />
   <title>Learn Dock</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23050505'/%3E%3Cpath d='M16 18h22c5.5 0 10 4.5 10 10v18H26c-5.5 0-10-4.5-10-10V18Z' fill='none' stroke='%23f5f5f5' stroke-width='4'/%3E%3Cpath d='M26 28h18M26 36h12' stroke='%23f5f5f5' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E" />
@@ -26,7 +27,7 @@
       --radius-lg: 20px;
       --radius-md: 14px;
       --radius-sm: 10px;
-      --max: 1260px;
+      --max: 1180px;
       --ease: cubic-bezier(.2,.8,.2,1);
     }
 
@@ -42,12 +43,13 @@
       min-height: 100vh;
       font-family: Manrope, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
       background:
-        radial-gradient(circle at top left, rgba(255,255,255,.055), transparent 32rem),
-        radial-gradient(circle at 85% 0%, rgba(255,255,255,.035), transparent 28rem),
-        linear-gradient(180deg, #050505 0%, #080808 45%, #050505 100%);
+        radial-gradient(circle at top left, rgba(255,255,255,.045), transparent 30rem),
+        linear-gradient(180deg, #050505 0%, #080808 48%, #050505 100%);
       color: var(--text);
       line-height: 1.5;
       overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
     }
 
     body::before {
@@ -68,6 +70,17 @@
       color: inherit;
     }
 
+    button, a, .nav-btn, .task-card, .note-card, .reminder-card, .homework-card, .mini-stat, .stat-card {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    input, textarea {
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
     button {
       border: 0;
       cursor: pointer;
@@ -79,21 +92,21 @@
     .app {
       width: min(100% - 32px, var(--max));
       margin: 0 auto;
-      padding: 24px 0 52px;
+      padding: 16px 0 52px;
     }
 
     .topbar {
       position: sticky;
-      top: 14px;
+      top: 12px;
       z-index: 30;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
       padding: 12px 14px;
-      background: rgba(10,10,10,.82);
+      background: rgba(10,10,10,.9);
       border: 1px solid var(--line);
-      border-radius: 999px;
+      border-radius: 24px;
       backdrop-filter: blur(18px);
       box-shadow: 0 16px 60px rgba(0,0,0,.35);
     }
@@ -106,17 +119,7 @@
     }
 
     .brand-mark {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background:
-        linear-gradient(135deg, #1a1a1a, #080808),
-        #111;
-      border: 1px solid #333;
-      display: grid;
-      place-items: center;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
-      flex: none;
+      display: none;
     }
 
     .brand-mark span {
@@ -151,7 +154,7 @@
     }
 
     .brand-title strong {
-      font-size: 15px;
+      font-size: 18px;
       letter-spacing: -.02em;
       white-space: nowrap;
     }
@@ -243,10 +246,57 @@
 
     .hero {
       display: grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 22px;
+      grid-template-columns: 1fr;
+      gap: 18px;
       align-items: stretch;
-      padding: 54px 0 22px;
+      padding: 26px 0 18px;
+    }
+
+    .app-home {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .home-menu-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .home-menu-card {
+      min-height: 122px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, #111, #0a0a0a);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease);
+      text-align: left;
+    }
+
+    .home-menu-card:hover,
+    .home-menu-card:active {
+      transform: translateY(-2px);
+      border-color: #3d3d3d;
+      background: linear-gradient(180deg, #151515, #0b0b0b);
+    }
+
+    .home-menu-card strong {
+      font-size: 18px;
+      letter-spacing: -.025em;
+      overflow-wrap: anywhere;
+    }
+
+    .home-menu-card span {
+      color: var(--muted-2);
+      font-size: 13px;
+      margin-top: 12px;
+      overflow-wrap: anywhere;
     }
 
     .hero-card, .panel {
@@ -259,8 +309,8 @@
 
     .hero-card {
       position: relative;
-      padding: clamp(24px, 4vw, 46px);
-      min-height: 420px;
+      padding: clamp(22px, 4vw, 36px);
+      min-height: auto;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -269,12 +319,12 @@
     .hero-card::after {
       content: "";
       position: absolute;
-      width: 340px;
-      height: 340px;
-      right: -120px;
-      bottom: -120px;
+      width: 260px;
+      height: 260px;
+      right: -110px;
+      bottom: -130px;
       border-radius: 50%;
-      background: rgba(255,255,255,.06);
+      background: rgba(255,255,255,.045);
       filter: blur(10px);
       pointer-events: none;
     }
@@ -303,10 +353,11 @@
 
     h1 {
       max-width: 760px;
-      margin: 24px 0 14px;
-      font-size: clamp(42px, 8vw, 86px);
-      line-height: .92;
-      letter-spacing: -.052em;
+      margin: 18px 0 12px;
+      font-size: clamp(34px, 7vw, 58px);
+      line-height: .98;
+      letter-spacing: -.045em;
+      overflow-wrap: anywhere;
     }
 
     .hero p {
@@ -317,10 +368,7 @@
     }
 
     .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 30px;
+      display: none;
     }
 
     .hero-side {
@@ -329,15 +377,15 @@
     }
 
     .clock-card {
-      padding: 28px;
-      min-height: 210px;
+      padding: 24px;
+      min-height: 180px;
     }
 
     .clock-time {
-      font-size: clamp(44px, 7vw, 76px);
+      font-size: clamp(42px, 7vw, 64px);
       line-height: 1;
-      letter-spacing: -.06em;
-      margin-top: 20px;
+      letter-spacing: -.045em;
+      margin-top: 18px;
       font-variant-numeric: tabular-nums;
     }
 
@@ -451,19 +499,19 @@
 
     .week-grid {
       display: grid;
-      grid-template-columns: repeat(7, minmax(190px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
       gap: 12px;
-      overflow-x: auto;
+      overflow: visible;
       padding-bottom: 4px;
-      scrollbar-color: #333 transparent;
     }
 
     .day-col {
       border: 1px solid var(--line);
       background: #0a0a0a;
       border-radius: var(--radius-lg);
-      min-height: 430px;
+      min-height: 220px;
       padding: 13px;
+      overflow: hidden;
     }
 
     .day-name {
@@ -487,6 +535,9 @@
       border-radius: 16px;
       padding: 13px;
       transition: transform .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease);
+      max-width: 100%;
+      min-width: 0;
+      overflow: hidden;
     }
 
     .task-card:hover, .note-card:hover, .reminder-card:hover, .homework-card:hover {
@@ -499,9 +550,20 @@
       justify-content: space-between;
       gap: 10px;
       align-items: start;
+      min-width: 0;
     }
 
-    .card-top strong { word-break: break-word; }
+    .card-top > div:first-child {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .card-top strong {
+      display: block;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      hyphens: auto;
+    }
 
     .meta {
       color: var(--muted-2);
@@ -515,12 +577,17 @@
       margin-top: 9px;
       white-space: pre-wrap;
       word-break: break-word;
+      overflow-wrap: anywhere;
+      hyphens: auto;
+      max-width: 100%;
     }
 
     .card-actions {
       display: flex;
       gap: 5px;
       flex: none;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .chip {
@@ -544,7 +611,7 @@
 
     .list-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 12px;
     }
 
@@ -768,15 +835,15 @@
     .desktop-hidden { display: none; }
 
     @media (max-width: 1080px) {
-      .hero { grid-template-columns: 1fr; }
+      .hero, .app-home { grid-template-columns: 1fr; }
       .grid-2, .pomodoro-layout { grid-template-columns: 1fr; }
       .list-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .stats-grid, .stats-grid.three { grid-template-columns: repeat(2, 1fr); }
     }
 
     @media (max-width: 820px) {
-      .app { width: min(100% - 22px, var(--max)); padding-top: 12px; }
-      .topbar { border-radius: 24px; align-items: stretch; flex-wrap: wrap; top: 8px; }
+      .app { width: min(100% - 22px, var(--max)); padding-top: 10px; padding-bottom: 92px; }
+      .topbar { border-radius: 22px; align-items: stretch; flex-wrap: wrap; top: 8px; }
       .brand { flex: 1; }
       .top-actions { margin-left: auto; }
       .mobile-menu { display: inline-flex; }
@@ -789,29 +856,221 @@
       }
       .nav.open { display: grid; grid-template-columns: repeat(2, 1fr); }
       .nav-btn { text-align: center; }
-      .hero { padding-top: 28px; }
+      .hero { padding-top: 20px; }
       .hero-card { min-height: auto; }
+      .home-menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .mini-stats { grid-template-columns: 1fr; }
       .section-head { align-items: start; flex-direction: column; }
       .list-grid { grid-template-columns: 1fr; }
       .settings-grid { grid-template-columns: 1fr; }
       .row { grid-template-columns: 1fr; }
       .clock-card { min-height: auto; }
+      .week-grid { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 540px) {
       .brand-title small { display: none; }
       .icon-btn { width: 39px; height: 39px; }
       .mini-stats.compact { grid-template-columns: 1fr; }
+      .home-menu-grid { grid-template-columns: 1fr; }
       .hero-actions, .timer-controls { flex-direction: column; }
       .hero-actions button, .timer-controls button { width: 100%; }
       .panel { padding: 15px; border-radius: 22px; }
       .stats-grid, .stats-grid.three { grid-template-columns: 1fr; }
       .bar-chart { overflow-x: auto; grid-template-columns: repeat(7, 48px); }
+      .home-menu-card { min-height: 104px; }
+    }
+  
+
+    /* Learn Dock Android app release overrides */
+    html[data-theme="light"] {
+      --bg: #f6f3ee;
+      --bg-soft: #ffffff;
+      --panel: #ffffff;
+      --panel-2: #f0ebe4;
+      --panel-3: #e7dfd5;
+      --line: rgba(20,20,20,.12);
+      --line-soft: rgba(20,20,20,.08);
+      --text: #151515;
+      --muted: #625d56;
+      --muted-2: #90887f;
+      --shadow: 0 20px 70px rgba(30,24,16,.12);
+    }
+
+    html[data-theme="dark"] {
+      --bg: #050505;
+      --bg-soft: #0a0a0a;
+      --panel: #101010;
+      --panel-2: #151515;
+      --panel-3: #1d1d1d;
+      --line: #262626;
+      --line-soft: #1d1d1d;
+      --text: #f5f5f5;
+      --muted: #a8a8a8;
+      --muted-2: #747474;
+      --shadow: 0 24px 80px rgba(0,0,0,.55);
+    }
+
+    html[data-theme="light"] body {
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,.78), transparent 28rem),
+        radial-gradient(circle at top right, rgba(0,0,0,.05), transparent 26rem),
+        var(--bg);
+    }
+
+    html[data-theme="light"] body::before {
+      background-image:
+        linear-gradient(rgba(0,0,0,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,.025) 1px, transparent 1px);
+    }
+
+    .app {
+      width: min(100% - 24px, var(--max));
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding-top: max(14px, env(safe-area-inset-top));
+      padding-bottom: calc(96px + env(safe-area-inset-bottom));
+    }
+
+    .topbar, .hero-card, .panel, .mini-stat, .day-col, .stat-card, input, textarea, select, .task-card, .note-card, .reminder-card, .homework-card, .modal, .toast-item {
+      background: color-mix(in srgb, var(--panel) 92%, transparent) !important;
+      color: var(--text);
+    }
+
+    .topbar {
+      border-color: var(--line);
+    }
+
+    .brand-mark { display: none !important; }
+
+    .nav {
+      position: fixed !important;
+      left: 10px;
+      right: 10px;
+      bottom: max(10px, env(safe-area-inset-bottom));
+      z-index: 70;
+      display: grid !important;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 8px;
+      border-radius: 26px;
+      background: color-mix(in srgb, var(--panel) 90%, transparent) !important;
+      backdrop-filter: blur(22px);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .nav-btn {
+      min-width: 0;
+      padding: 10px 5px;
+      border-radius: 18px;
+      font-size: 10.5px;
+      font-weight: 800;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav-btn.active {
+      background: var(--text) !important;
+      color: var(--bg) !important;
+    }
+
+    .primary-btn {
+      background: var(--text) !important;
+      color: var(--bg) !important;
+    }
+
+    .hero-card::after { display: none; }
+
+    .hero h1 {
+      max-width: 780px;
+      font-size: clamp(34px, 8vw, 58px);
+      line-height: .96;
+      letter-spacing: -.055em;
+    }
+
+    .home-menu-card {
+      position: relative;
+      background: var(--panel) !important;
+      min-height: 126px;
+      overflow: hidden;
+    }
+
+    .home-menu-card::after {
+      content: '›';
+      position: absolute;
+      top: 12px;
+      right: 18px;
+      color: var(--muted-2);
+      font-size: 24px;
+    }
+
+    .week-grid {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)) !important;
+      align-items: start !important;
+      overflow: visible !important;
+    }
+
+    .day-col {
+      min-height: 160px !important;
+      height: auto !important;
+      overflow: visible !important;
+      align-self: start !important;
+    }
+
+    .task-card, .note-card, .reminder-card, .homework-card {
+      max-width: 100%;
+      min-width: 0;
+      overflow: hidden;
+      box-shadow: 0 10px 34px rgba(0,0,0,.045);
+    }
+
+    html[data-theme="dark"] .task-card,
+    html[data-theme="dark"] .note-card,
+    html[data-theme="dark"] .reminder-card,
+    html[data-theme="dark"] .homework-card {
+      box-shadow: none;
+    }
+
+    .card-top > div:first-child {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .card-top strong, .desc, .meta {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      hyphens: auto;
+    }
+
+    .timer-ring {
+      background: conic-gradient(var(--text) var(--progress, 0deg), var(--panel-2) 0deg) !important;
+    }
+
+    .timer-ring::before {
+      background: var(--panel) !important;
+    }
+
+    @media (max-width: 820px) {
+      .app { width: min(100% - 20px, var(--max)); }
+      .topbar { top: max(8px, env(safe-area-inset-top)); }
+      .nav { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+      .app-home { grid-template-columns: 1fr !important; }
+    }
+
+    @media (max-width: 540px) {
+      .home-menu-grid { grid-template-columns: 1fr !important; }
+      .week-grid { grid-template-columns: 1fr !important; }
+      .card-top { flex-direction: column; }
+      .card-actions { width: 100%; justify-content: flex-start; }
+      .card-actions .small-btn { flex: 1; }
     }
   </style>
 </head>
-<body>
+<body class="app-mode">
   <div class="app">
     <header class="topbar">
       <a class="brand" href="#home" data-tab-link="home" aria-label="Study Planner home">
@@ -841,39 +1100,39 @@
 
     <main>
       <section class="hero section active" id="home">
-        <div class="hero-card">
-          <div>
-            <span class="eyebrow" data-i18n="heroEyebrow">Private, fast, no account required</span>
-            <h1 data-i18n="heroTitle">A clean place to organize your study life.</h1>
-            <p data-i18n="heroText">Build your weekly schedule, track homework, write notes, run focus sessions, and keep study statistics in one lightweight dashboard.</p>
-            <div class="hero-actions">
-              <button class="primary-btn" data-tab-open="schedule" data-i18n="startPlanning">Start planning</button>
-              <button class="ghost-btn" data-tab-open="pomodoro" data-i18n="startTimer">Start focus timer</button>
+        <div class="app-home">
+          <div class="hero-card">
+            <div>
+              <span class="eyebrow" data-i18n="heroEyebrow">Ready to study</span>
+              <h1 data-i18n="heroTitle">What do you want to do today?</h1>
+              <p data-i18n="heroText">Choose a tool and keep your study day clear, focused, and organized.</p>
+              <div class="home-menu-grid">
+                <button class="home-menu-card" data-tab-open="schedule"><strong data-i18n="navSchedule">Schedule</strong><span data-i18n="scheduleCardText">Plan your week</span></button>
+                <button class="home-menu-card" data-tab-open="homework"><strong data-i18n="navHomework">Homework</strong><span data-i18n="homeworkCardText">Track tasks</span></button>
+                <button class="home-menu-card" data-tab-open="notes"><strong data-i18n="navNotes">Notes</strong><span data-i18n="notesCardText">Save ideas</span></button>
+                <button class="home-menu-card" data-tab-open="pomodoro"><strong data-i18n="navPomodoro">Pomodoro</strong><span data-i18n="pomodoroCardText">Focus timer</span></button>
+                <button class="home-menu-card" data-tab-open="reminders"><strong data-i18n="navReminders">Reminders</strong><span data-i18n="remindersCardText">Stay on time</span></button>
+                <button class="home-menu-card" data-tab-open="stats"><strong data-i18n="navStats">Stats</strong><span data-i18n="statsCardText">See progress</span></button>
+              </div>
             </div>
           </div>
+
+          <aside class="hero-side">
+            <div class="panel clock-card">
+              <div class="panel-title">
+                <h3 data-i18n="today">Today</h3>
+                <small id="timezoneLabel"></small>
+              </div>
+              <div class="clock-time" id="clockTime">00:00</div>
+              <div class="clock-date" id="clockDate">Loading</div>
+            </div>
+
+            <div class="mini-stats compact">
+              <div class="mini-stat"><span data-i18n="pendingHomework">Homework</span><strong id="homeHomework">0</strong></div>
+              <div class="mini-stat"><span data-i18n="activeReminders">Reminders</span><strong id="homeReminders">0</strong></div>
+            </div>
+          </aside>
         </div>
-
-        <aside class="hero-side">
-          <div class="panel clock-card">
-            <div class="panel-title">
-              <h3 data-i18n="today">Today</h3>
-              <small id="timezoneLabel"></small>
-            </div>
-            <div class="clock-time" id="clockTime">00:00</div>
-            <div class="clock-date" id="clockDate">Loading</div>
-          </div>
-
-          <div class="mini-stats compact">
-            <div class="mini-stat">
-              <span data-i18n="pendingHomework">Homework</span>
-              <strong id="homeHomework">0</strong>
-            </div>
-            <div class="mini-stat">
-              <span data-i18n="activeReminders">Reminders</span>
-              <strong id="homeReminders">0</strong>
-            </div>
-          </div>
-        </aside>
       </section>
 
       <section class="section" id="schedule">
@@ -993,8 +1252,9 @@
           </div>
           
         </div>
-        <div class="stats-grid three">
-          <div class="stat-card"><span data-i18n="totalFocus">Total focus</span><strong id="statTotal">0m</strong><small data-i18n="allTime">All time</small></div>
+        <div class="stats-grid">
+          <div class="stat-card"><span data-i18n="timeInApp">Time in app</span><strong id="statAppTime">0m</strong><small data-i18n="allTime">All time</small></div>
+          <div class="stat-card"><span data-i18n="totalFocus">Focus time</span><strong id="statTotal">0m</strong><small data-i18n="allTime">All time</small></div>
           <div class="stat-card"><span data-i18n="sessions">Sessions</span><strong id="statSessions">0</strong><small data-i18n="completed">Completed</small></div>
           <div class="stat-card"><span data-i18n="bestDay">Best day</span><strong id="statBest">0m</strong><small data-i18n="thisWeek">This week</small></div>
         </div>
@@ -1022,6 +1282,22 @@
                 <option value="en">English</option>
                 <option value="ru">Русский</option>
               </select>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-title"><h3 data-i18n="theme">Theme</h3></div>
+            <div class="form">
+              <select id="themeSelect">
+                <option value="light" data-i18n="lightTheme">Light</option>
+                <option value="dark" data-i18n="darkTheme">Dark</option>
+              </select>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-title"><h3 data-i18n="notifications">Notifications</h3></div>
+            <div class="form">
+              <button class="ghost-btn" id="enableNotifications" data-i18n="enableNotifications">Enable notifications</button>
+              <button class="ghost-btn" id="testAlarm" data-i18n="testAlarm">Test alarm sound</button>
             </div>
           </div>
           <div class="panel">
@@ -1062,26 +1338,26 @@
     const i18n = {
       en: {
         tagline: 'Plan better. Study calmly.', navHome: 'Home', navSchedule: 'Schedule', navHomework: 'Homework', navNotes: 'Notes', navPomodoro: 'Pomodoro', navReminders: 'Reminders', navStats: 'Stats', navSettings: 'Settings',
-        heroEyebrow: 'Private, fast, no account required', heroTitle: 'A clean place to organize your study life.', heroText: 'Build your weekly schedule, track homework, write notes, run focus sessions, and keep study statistics in one lightweight dashboard.', startPlanning: 'Start planning', startTimer: 'Start focus timer', today: 'Today', todayFocus: 'Focus today', pendingHomework: 'Homework', activeReminders: 'Reminders',
+        heroEyebrow: 'Ready to study', heroTitle: 'What do you want to do today?', heroText: 'Choose a tool and keep your study day clear, focused, and organized.', scheduleCardText: 'Plan your week', homeworkCardText: 'Track tasks', notesCardText: 'Save ideas', pomodoroCardText: 'Focus timer', remindersCardText: 'Do not miss deadlines', statsCardText: 'See progress', timeInApp: 'Time in app', startPlanning: 'Start planning', startTimer: 'Start focus timer', today: 'Today', todayFocus: 'Focus today', pendingHomework: 'Homework', activeReminders: 'Reminders',
         scheduleTitle: 'Weekly schedule', scheduleText: 'Add lessons, self-study blocks, practice sessions, or personal tasks for each day.', addBlock: 'Add block',
         homeworkTitle: 'Homework', homeworkText: 'Keep tasks visible and mark them done when finished.', addHomework: 'Add homework', searchHomework: 'Search homework', filterAll: 'All', filterOpen: 'Open', filterDone: 'Done',
         notesTitle: 'Notes', notesText: 'Write summaries, formulas, ideas, and quick thoughts. Everything stays on this device.', addNote: 'Add note', searchNotes: 'Search notes',
         pomodoroTitle: 'Pomodoro timer', pomodoroText: 'Stay focused with work sessions and breaks. Completed focus time is added to your statistics.', focus: 'Focus', shortBreak: 'Short break', longBreak: 'Long break', start: 'Start', pause: 'Pause', reset: 'Reset', timerSettings: 'Timer settings', focusMinutes: 'Focus minutes', shortMinutes: 'Short break minutes', longMinutes: 'Long break minutes', saveSettings: 'Save settings',
         remindersTitle: 'Reminders', remindersText: 'Create reminders for exams, lessons, deadlines, and study sessions.', addReminder: 'Add reminder',
         statsTitle: 'Study statistics', statsText: 'See how much time you spent studying and how consistent your week looks.', resetStats: 'Reset stats', totalFocus: 'Total focus', allTime: 'All time', sessions: 'Sessions', completed: 'Completed', bestDay: 'Best day', thisWeek: 'This week', weeklyFocus: 'Weekly focus', minutes: 'Minutes',
-        settingsTitle: 'Settings', settingsText: 'Manage language, export your data, or clear saved information from this browser.', language: 'Language', dataManagement: 'Data management', exportData: 'Export data', importData: 'Import data', clearData: 'Clear all data', footerText: 'Made for focused students. Your data stays in your browser.',
+        settingsTitle: 'Settings', settingsText: 'Manage theme, language, notifications, and saved data.', language: 'Language', theme: 'Theme', lightTheme: 'Light', darkTheme: 'Dark', notifications: 'Notifications', enableNotifications: 'Enable notifications', testAlarm: 'Test alarm sound', notificationsReady: 'Notifications enabled', notificationBlocked: 'Notifications blocked', dataManagement: 'Data management', exportData: 'Export data', importData: 'Import data', clearData: 'Clear all data', footerText: 'Made for focused students. Your data stays in your browser.',
         noItems: 'Nothing here yet.', subject: 'Subject or task', day: 'Day', startTime: 'Start time', endTime: 'End time', description: 'Description', save: 'Save', cancel: 'Cancel', title: 'Title', dueDate: 'Due date', priority: 'Priority', low: 'Low', medium: 'Medium', high: 'High', content: 'Content', reminderAt: 'Reminder time', edit: 'Edit', delete: 'Delete', done: 'Done', reopen: 'Reopen', saved: 'Saved', deleted: 'Deleted', completedMsg: 'Completed', dataCleared: 'All data cleared', imported: 'Data imported', exported: 'Data exported', confirmClear: 'Clear all saved data from this browser?', confirmStats: 'Reset all focus statistics?', invalidImport: 'Could not import this file', timerDone: 'Session finished', timerSaved: 'Timer settings saved', required: 'Please fill in required fields', scheduleEmpty: 'No blocks', homeworkEmpty: 'No homework found.', notesEmpty: 'No notes found.', remindersEmpty: 'No reminders found.'
       },
       ru: {
         tagline: 'Планируй лучше. Учись спокойнее.', navHome: 'Главная', navSchedule: 'Расписание', navHomework: 'Домашка', navNotes: 'Заметки', navPomodoro: 'Pomodoro', navReminders: 'Напоминания', navStats: 'Статистика', navSettings: 'Настройки',
-        heroEyebrow: 'Быстро, приватно, без аккаунта', heroTitle: 'Чистое место для учебы и порядка.', heroText: 'Составляй расписание, отслеживай домашку, пиши заметки, запускай фокус-сессии и смотри статистику в одном легком дашборде.', startPlanning: 'Начать планировать', startTimer: 'Запустить таймер', today: 'Сегодня', todayFocus: 'Фокус сегодня', pendingHomework: 'Домашка', activeReminders: 'Напоминания',
+        heroEyebrow: 'Готов к учебе', heroTitle: 'Что будем делать сегодня?', heroText: 'Выбери нужный инструмент и держи учебный день под контролем.', scheduleCardText: 'План недели', homeworkCardText: 'Задачи и домашка', notesCardText: 'Идеи и конспекты', pomodoroCardText: 'Таймер фокуса', remindersCardText: 'Не забыть дедлайны', statsCardText: 'Прогресс', timeInApp: 'Время в приложении', startPlanning: 'Начать планировать', startTimer: 'Запустить таймер', today: 'Сегодня', todayFocus: 'Фокус сегодня', pendingHomework: 'Домашка', activeReminders: 'Напоминания',
         scheduleTitle: 'Расписание недели', scheduleText: 'Добавляй уроки, самостоятельную подготовку, практику или личные задачи на каждый день.', addBlock: 'Добавить блок',
         homeworkTitle: 'Домашка', homeworkText: 'Держи задания перед глазами и отмечай выполненные.', addHomework: 'Добавить домашку', searchHomework: 'Поиск домашки', filterAll: 'Все', filterOpen: 'Открытые', filterDone: 'Готовые',
         notesTitle: 'Заметки', notesText: 'Пиши конспекты, формулы, идеи и быстрые мысли. Всё остается на этом устройстве.', addNote: 'Добавить заметку', searchNotes: 'Поиск заметок',
         pomodoroTitle: 'Таймер Pomodoro', pomodoroText: 'Фокусируйся через учебные сессии и перерывы. Завершенное время добавляется в статистику.', focus: 'Фокус', shortBreak: 'Короткий перерыв', longBreak: 'Длинный перерыв', start: 'Старт', pause: 'Пауза', reset: 'Сброс', timerSettings: 'Настройки таймера', focusMinutes: 'Минуты фокуса', shortMinutes: 'Короткий перерыв', longMinutes: 'Длинный перерыв', saveSettings: 'Сохранить',
         remindersTitle: 'Напоминания', remindersText: 'Создавай напоминания для экзаменов, уроков, дедлайнов и учебных сессий.', addReminder: 'Добавить напоминание',
         statsTitle: 'Статистика учебы', statsText: 'Смотри, сколько ты учился и насколько стабильной была неделя.', resetStats: 'Сбросить статистику', totalFocus: 'Всего фокуса', allTime: 'За всё время', sessions: 'Сессии', completed: 'Завершено', bestDay: 'Лучший день', thisWeek: 'Эта неделя', weeklyFocus: 'Фокус за неделю', minutes: 'Минуты',
-        settingsTitle: 'Настройки', settingsText: 'Управляй языком, экспортируй данные или очищай сохранения в этом браузере.', language: 'Язык', dataManagement: 'Управление данными', exportData: 'Экспорт данных', importData: 'Импорт данных', clearData: 'Очистить всё', footerText: 'Сделано для сфокусированных учеников. Данные остаются в браузере.',
+        settingsTitle: 'Настройки', settingsText: 'Управляй темой, языком, уведомлениями и сохранёнными данными.', language: 'Язык', theme: 'Тема', lightTheme: 'Светлая', darkTheme: 'Тёмная', notifications: 'Уведомления', enableNotifications: 'Включить уведомления', testAlarm: 'Проверить звук таймера', notificationsReady: 'Уведомления включены', notificationBlocked: 'Уведомления заблокированы', dataManagement: 'Управление данными', exportData: 'Экспорт данных', importData: 'Импорт данных', clearData: 'Очистить всё', footerText: 'Сделано для сфокусированных учеников. Данные остаются в браузере.',
         noItems: 'Пока здесь пусто.', subject: 'Предмет или задача', day: 'День', startTime: 'Начало', endTime: 'Конец', description: 'Описание', save: 'Сохранить', cancel: 'Отмена', title: 'Название', dueDate: 'Срок', priority: 'Приоритет', low: 'Низкий', medium: 'Средний', high: 'Высокий', content: 'Текст', reminderAt: 'Время напоминания', edit: 'Изменить', delete: 'Удалить', done: 'Готово', reopen: 'Открыть', saved: 'Сохранено', deleted: 'Удалено', completedMsg: 'Выполнено', dataCleared: 'Данные очищены', imported: 'Данные импортированы', exported: 'Данные экспортированы', confirmClear: 'Очистить все данные из этого браузера?', confirmStats: 'Сбросить всю статистику фокуса?', invalidImport: 'Не удалось импортировать файл', timerDone: 'Сессия завершена', timerSaved: 'Настройки таймера сохранены', required: 'Заполни обязательные поля', scheduleEmpty: 'Нет блоков', homeworkEmpty: 'Домашка не найдена.', notesEmpty: 'Заметки не найдены.', remindersEmpty: 'Напоминания не найдены.'
       }
     };
@@ -1091,11 +1367,12 @@
 
     const defaultState = {
       language: 'en',
+      theme: 'light',
       schedule: [],
       homework: [],
       notes: [],
       reminders: [],
-      stats: { totalMinutes: 0, sessions: 0, byDate: {} },
+      stats: { totalMinutes: 0, sessions: 0, byDate: {}, appSeconds: 0 },
       timer: { focus: 25, short: 5, long: 15 }
     };
 
@@ -1110,6 +1387,11 @@
       startedAt: null
     };
 
+    let appTime = {
+      lastTick: Date.now(),
+      saveCounter: 0
+    }; 
+
     const $ = (selector, root = document) => root.querySelector(selector);
     const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
     const t = (key) => i18n[state.language][key] || i18n.en[key] || key;
@@ -1119,7 +1401,7 @@
     function loadState() {
       try {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-        return { ...structuredClone(defaultState), ...saved, timer: { ...defaultState.timer, ...(saved?.timer || {}) }, stats: { ...defaultState.stats, ...(saved?.stats || {}) } };
+        return { ...structuredClone(defaultState), ...saved, theme: saved?.theme || 'light', timer: { ...defaultState.timer, ...(saved?.timer || {}) }, stats: { ...defaultState.stats, ...(saved?.stats || {}) } };
       } catch {
         return structuredClone(defaultState);
       }
@@ -1140,6 +1422,10 @@
       const h = Math.floor(min / 60);
       const m = min % 60;
       return m ? `${h}h ${m}m` : `${h}h`;
+    }
+
+    function formatSeconds(seconds) {
+      return formatMinutes(Math.floor((seconds || 0) / 60));
     }
 
     function formatDateTime(value) {
@@ -1175,6 +1461,16 @@
       $$('[data-i18n-placeholder]').forEach(el => el.placeholder = t(el.dataset.i18nPlaceholder));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       renderAll();
+    }
+
+    function setTheme(theme) {
+      state.theme = theme || 'light';
+      document.documentElement.dataset.theme = state.theme;
+      const themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeMeta) themeMeta.setAttribute('content', state.theme === 'dark' ? '#050505' : '#f6f3ee');
+      const select = $('#themeSelect');
+      if (select) select.value = state.theme;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
 
     function switchTab(id) {
@@ -1257,6 +1553,7 @@
       const today = todayKey();
       const weekDates = getWeekDates();
       const weekValues = weekDates.map(d => byDate[d] || 0);
+      $('#statAppTime').textContent = formatSeconds(state.stats.appSeconds || 0);
       $('#statTotal').textContent = formatMinutes(state.stats.totalMinutes);
       $('#statSessions').textContent = state.stats.sessions || 0;
       $('#statBest').textContent = formatMinutes(Math.max(0, ...weekValues));
@@ -1470,6 +1767,8 @@
         state.stats.byDate[key] = (state.stats.byDate[key] || 0) + minutes;
         saveState();
       }
+      playAlarm();
+      notify('Learn Dock', t('timerDone'));
       toast(t('timerDone'));
       setTimerMode(timer.mode === 'focus' ? 'short' : 'focus');
     }
@@ -1488,11 +1787,73 @@
       return Math.min(max, Math.max(min, value));
     }
 
+    let audioCtx = null;
+
+    function unlockAudio() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+      } catch {}
+    }
+
+    function beep(freq, duration, delay) {
+      try {
+        unlockAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        const now = audioCtx.currentTime + delay;
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.22, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+        osc.start(now);
+        osc.stop(now + duration + 0.03);
+      } catch {}
+    }
+
+    function playAlarm() {
+      unlockAudio();
+      for (let i = 0; i < 6; i++) {
+        beep(880, .18, i * .32);
+        beep(660, .16, i * .32 + .18);
+      }
+      if (navigator.vibrate) navigator.vibrate([250,120,250,120,500]);
+    }
+
+    function requestNotifications() {
+      if (!('Notification' in window)) return toast(t('notificationBlocked') || 'Notifications are not available');
+      Notification.requestPermission().then(p => toast(p === 'granted' ? (t('notificationsReady') || 'Notifications enabled') : (t('notificationBlocked') || 'Notifications blocked'))).catch(() => toast('Notifications unavailable'));
+    }
+
+    function notify(title, body) {
+      try {
+        if ('Notification' in window && Notification.permission === 'granted') new Notification(title, { body });
+      } catch {}
+    }
+
     function updateClock() {
       const now = new Date();
-      $('#clockTime').textContent = new Intl.DateTimeFormat(state.language === 'ru' ? 'ru-RU' : 'en-US', { hour: '2-digit', minute: '2-digit' }).format(now);
+      $('#clockTime').textContent = new Intl.DateTimeFormat(state.language === 'ru' ? 'ru-RU' : 'en-US', { hour: '2-digit', minute: '2-digit', hour12: false }).format(now);
       $('#clockDate').textContent = new Intl.DateTimeFormat(state.language === 'ru' ? 'ru-RU' : 'en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).format(now);
       $('#timezoneLabel').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    }
+
+    function trackAppTime() {
+      const now = Date.now();
+      const delta = Math.max(0, Math.min(15, Math.floor((now - appTime.lastTick) / 1000)));
+      appTime.lastTick = now;
+      if (document.visibilityState === 'visible' && delta > 0) {
+        state.stats.appSeconds = (state.stats.appSeconds || 0) + delta;
+        appTime.saveCounter += delta;
+        if (appTime.saveCounter >= 10) {
+          appTime.saveCounter = 0;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+        renderStats();
+      }
     }
 
     function checkReminders() {
@@ -1502,7 +1863,8 @@
         if (time && time <= now && !item.notified) {
           item.notified = true;
           toast(item.title);
-          if ('Notification' in window && Notification.permission === 'granted') new Notification('Study Planner', { body: item.title });
+          playAlarm();
+          notify('Learn Dock', item.title);
         }
       });
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -1552,6 +1914,7 @@
       $('#menuToggle').addEventListener('click', () => $('#nav').classList.toggle('open'));
       $('#languageToggle').addEventListener('click', () => setLanguage(state.language === 'en' ? 'ru' : 'en'));
       $('#languageSelect').addEventListener('change', e => setLanguage(e.target.value));
+      $('#themeSelect').addEventListener('change', e => setTheme(e.target.value));
       $('#modalForm').addEventListener('submit', handleModalSubmit);
       $('#closeModal').addEventListener('click', closeModal);
       $('#modalBackdrop').addEventListener('click', e => { if (e.target.id === 'modalBackdrop') closeModal(); });
@@ -1564,19 +1927,22 @@
       $('#timerReset').addEventListener('click', resetTimer);
       $('#saveTimerSettings').addEventListener('click', saveTimerSettings);
       $('#clearData').addEventListener('click', () => { if (confirm(t('confirmClear'))) { state = structuredClone(defaultState); saveState(); setLanguage('en'); toast(t('dataCleared')); } });
+      $('#enableNotifications').addEventListener('click', requestNotifications);
+      $('#testAlarm').addEventListener('click', () => { playAlarm(); notify('Learn Dock', t('timerDone')); });
       $('#exportData').addEventListener('click', exportData);
       $('#importFile').addEventListener('change', e => { if (e.target.files[0]) importData(e.target.files[0]); });
       document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+      document.addEventListener('visibilitychange', () => { appTime.lastTick = Date.now(); localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); });
+      document.addEventListener('click', unlockAudio, { once: true });
     }
 
     function initNotifications() {
-      if ('Notification' in window && Notification.permission === 'default') {
-        setTimeout(() => Notification.requestPermission().catch(() => {}), 1800);
-      }
+      // Notification permission is requested from Settings, not on first launch.
     }
 
     function init() {
       initEvents();
+      setTheme(state.theme || 'light');
       setLanguage(state.language || 'en');
       setTimerMode('focus');
       updateClock();
@@ -1585,6 +1951,7 @@
       const initial = location.hash.replace('#', '');
       if (initial && document.getElementById(initial)) switchTab(initial);
       setInterval(updateClock, 1000);
+      setInterval(trackAppTime, 1000);
       setInterval(checkReminders, 30000);
     }
 
