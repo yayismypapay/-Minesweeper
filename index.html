@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#050505" />
-  <meta name="description" content="Learn Dock is a study planning app for schedules, homework, notes, reminders, focus sessions, and study statistics." />
+  <meta name="description" content="A clean study planner with schedule, homework, notes, Pomodoro timer, reminders, and study statistics." />
   <title>Learn Dock</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23050505'/%3E%3Cpath d='M16 18h22c5.5 0 10 4.5 10 10v18H26c-5.5 0-10-4.5-10-10V18Z' fill='none' stroke='%23f5f5f5' stroke-width='4'/%3E%3Cpath d='M26 28h18M26 36h12' stroke='%23f5f5f5' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E" />
   <style>
@@ -761,6 +761,16 @@
       gap: 18px;
     }
 
+    .footer {
+      margin-top: 40px;
+      padding: 24px;
+      text-align: center;
+      color: var(--muted-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: rgba(255,255,255,.015);
+    }
+
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -871,12 +881,64 @@
       .home-menu-card { min-height: 104px; }
     }
   
+  
+
+    /* Account and release cleanup */
+    .auth-strip {
+      margin-top: 18px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .auth-note {
+      color: var(--muted-2);
+      font-size: 13px;
+      margin-top: 10px;
+    }
+
+    .account-card {
+      display: grid;
+      gap: 14px;
+    }
+
+    .account-status {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: #0b0b0b;
+      color: var(--muted);
+      overflow-wrap: anywhere;
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .auth-tab.active {
+      background: #f5f5f5;
+      color: #050505;
+    }
+
+    .auth-form {
+      display: none;
+      gap: 12px;
+    }
+
+    .auth-form.active {
+      display: grid;
+    }
+
+    .footer { display: none !important; }
   </style>
 </head>
 <body class="app-mode">
   <div class="app">
     <header class="topbar">
-      <a class="brand" href="#home" data-tab-link="home" aria-label="Learn Dock home">
+      <a class="brand" href="#home" data-tab-link="home" aria-label="Study Planner home">
         <div class="brand-mark" aria-hidden="true"><span></span></div>
         <div class="brand-title">
           <strong>Learn Dock</strong>
@@ -909,6 +971,11 @@
               <span class="eyebrow" data-i18n="heroEyebrow">Ready to study</span>
               <h1 data-i18n="heroTitle">What do you want to do today?</h1>
               <p data-i18n="heroText">Choose a tool and keep your study day clear, focused, and organized.</p>
+              <div class="auth-strip" id="homeAuthStrip">
+                <button class="ghost-btn" id="homeSignIn" data-i18n="signIn">Sign in</button>
+                <button class="primary-btn" id="homeCreateAccount" data-i18n="createAccount">Create account</button>
+                <span class="auth-note" data-i18n="guestModeNote">You can continue without an account.</span>
+              </div>
               <div class="home-menu-grid">
                 <button class="home-menu-card" data-tab-open="schedule"><strong data-i18n="navSchedule">Schedule</strong><span data-i18n="scheduleCardText">Plan your week</span></button>
                 <button class="home-menu-card" data-tab-open="homework"><strong data-i18n="navHomework">Homework</strong><span data-i18n="homeworkCardText">Track tasks</span></button>
@@ -1074,10 +1141,47 @@
         <div class="section-head">
           <div>
             <h2 data-i18n="settingsTitle">Settings</h2>
-            <p data-i18n="settingsText">Manage app language, notifications, and saved data.</p>
+            <p data-i18n="settingsText">Manage account access, language, notifications, and app data.</p>
           </div>
         </div>
         <div class="settings-grid">
+          <div class="panel account-card">
+            <div class="panel-title"><h3 data-i18n="account">Account</h3></div>
+            <div class="account-status" id="accountStatus" data-i18n="guestStatus">You are using Learn Dock without an account.</div>
+
+            <div id="signedOutPanel">
+              <div class="auth-tabs">
+                <button class="small-btn auth-tab active" data-auth-tab="signin" data-i18n="signIn">Sign in</button>
+                <button class="small-btn auth-tab" data-auth-tab="register" data-i18n="createAccount">Create account</button>
+                <button class="small-btn auth-tab" data-auth-tab="reset" data-i18n="resetPassword">Reset password</button>
+              </div>
+
+              <form class="form auth-form active" id="signInForm">
+                <div class="field"><label data-i18n="email">Email</label><input id="signInEmail" type="email" autocomplete="email" required /></div>
+                <div class="field"><label data-i18n="password">Password</label><input id="signInPassword" type="password" autocomplete="current-password" required /></div>
+                <button class="primary-btn" type="submit" data-i18n="signIn">Sign in</button>
+              </form>
+
+              <form class="form auth-form" id="registerForm">
+                <div class="field"><label data-i18n="email">Email</label><input id="registerEmail" type="email" autocomplete="email" required /></div>
+                <div class="field"><label data-i18n="password">Password</label><input id="registerPassword" type="password" autocomplete="new-password" minlength="6" required /></div>
+                <button class="primary-btn" type="submit" data-i18n="createAccount">Create account</button>
+                <div class="auth-note" data-i18n="accountLocalNote">Your study data remains stored on this device. Cloud sync can be added later.</div>
+              </form>
+
+              <form class="form auth-form" id="resetForm">
+                <div class="field"><label data-i18n="email">Email</label><input id="resetEmail" type="email" autocomplete="email" required /></div>
+                <button class="primary-btn" type="submit" data-i18n="sendResetLink">Send reset link</button>
+              </form>
+            </div>
+
+            <div id="signedInPanel" style="display:none">
+              <div class="form">
+                <button class="ghost-btn" id="signOutBtn" data-i18n="signOut">Sign out</button>
+              </div>
+            </div>
+          </div>
+
           <div class="panel">
             <div class="panel-title"><h3 data-i18n="language">Language</h3></div>
             <div class="form">
@@ -1087,14 +1191,16 @@
               </select>
             </div>
           </div>
+
           <div class="panel">
             <div class="panel-title"><h3 data-i18n="notifications">Notifications</h3></div>
             <div class="form">
               <button class="ghost-btn" id="enableNotifications" data-i18n="enableNotifications">Enable notifications</button>
             </div>
           </div>
+
           <div class="panel">
-            <div class="panel-title"><h3 data-i18n="dataManagement">Data management</h3></div>
+            <div class="panel-title"><h3 data-i18n="dataManagement">App data</h3></div>
             <div class="form">
               <button class="ghost-btn" id="exportData" data-i18n="exportData">Export data</button>
               <label class="ghost-btn" style="cursor:pointer">
@@ -1107,7 +1213,9 @@
         </div>
       </section>
     </main>
-</div>
+
+    
+  </div>
 
   <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -1121,33 +1229,56 @@
 
   <div class="toast" id="toast"></div>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
+    import {
+      getAuth,
+      onAuthStateChanged,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      sendPasswordResetEmail,
+      signOut
+    } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
+
+    const firebaseConfig = {
+      apiKey: 'AIzaSyCi_tJxxNTRMy3mFFWBvdzVCi7JT9D-Om8',
+      authDomain: 'learn-dock-c56ef.firebaseapp.com',
+      projectId: 'learn-dock-c56ef',
+      storageBucket: 'learn-dock-c56ef.firebasestorage.app',
+      messagingSenderId: '370337363618',
+      appId: '1:370337363618:web:ec1a86889c3e6811d349fb'
+    };
+
+    const firebaseApp = initializeApp(firebaseConfig);
+    const auth = getAuth(firebaseApp);
+    let currentUser = null;
     const STORAGE_KEY = 'learnDock.app.v1';
+    const LEGACY_STORAGE_KEY = 'studyPlanner.public.v1';
 
     const i18n = {
       en: {
-        tagline: 'Plan better. Study calmly.', navHome: 'Home', navSchedule: 'Schedule', navHomework: 'Homework', navNotes: 'Notes', navPomodoro: 'Pomodoro', navReminders: 'Reminders', navStats: 'Stats', navSettings: 'Settings',
+        tagline: 'Plan better. Study calmly.', account: 'Account', signIn: 'Sign in', createAccount: 'Create account', resetPassword: 'Reset password', sendResetLink: 'Send reset link', signOut: 'Sign out', email: 'Email', password: 'Password', guestStatus: 'You are using Learn Dock without an account.', signedInStatus: 'Signed in as', guestModeNote: 'You can continue without an account.', accountLocalNote: 'Your study data remains stored on this device. Cloud sync can be added later.', authSuccess: 'Account connected', authSignedOut: 'Signed out', resetLinkSent: 'Password reset link sent', authError: 'Account action failed', navHome: 'Home', navSchedule: 'Schedule', navHomework: 'Homework', navNotes: 'Notes', navPomodoro: 'Pomodoro', navReminders: 'Reminders', navStats: 'Stats', navSettings: 'Settings',
         heroEyebrow: 'Ready to study', heroTitle: 'What do you want to do today?', heroText: 'Choose a tool and keep your study day clear, focused, and organized.', scheduleCardText: 'Plan your week', homeworkCardText: 'Track tasks', notesCardText: 'Save ideas', pomodoroCardText: 'Focus timer', remindersCardText: 'Do not miss deadlines', statsCardText: 'See progress', timeInApp: 'Time in app', startPlanning: 'Start planning', startTimer: 'Start focus timer', today: 'Today', todayFocus: 'Focus today', pendingHomework: 'Homework', activeReminders: 'Reminders',
         scheduleTitle: 'Weekly schedule', scheduleText: 'Add lessons, self-study blocks, practice sessions, or personal tasks for each day.', addBlock: 'Add block',
         homeworkTitle: 'Homework', homeworkText: 'Keep tasks visible and mark them done when finished.', addHomework: 'Add homework', searchHomework: 'Search homework', filterAll: 'All', filterOpen: 'Open', filterDone: 'Done',
         notesTitle: 'Notes', notesText: 'Write summaries, formulas, ideas, and quick thoughts. Everything stays on this device.', addNote: 'Add note', searchNotes: 'Search notes',
         pomodoroTitle: 'Pomodoro timer', pomodoroText: 'Stay focused with work sessions and breaks. Completed focus time is added to your statistics.', focus: 'Focus', shortBreak: 'Short break', longBreak: 'Long break', start: 'Start', pause: 'Pause', reset: 'Reset', timerSettings: 'Timer settings', focusMinutes: 'Focus minutes', shortMinutes: 'Short break minutes', longMinutes: 'Long break minutes', saveSettings: 'Save settings',
         remindersTitle: 'Reminders', remindersText: 'Create reminders for exams, lessons, deadlines, and study sessions.', addReminder: 'Add reminder',
-        statsTitle: 'Study statistics', statsText: 'See how much time you spent studying and how consistent your week looks.',  totalFocus: 'Total focus', allTime: 'All time', sessions: 'Sessions', completed: 'Completed', bestDay: 'Best day', thisWeek: 'This week', weeklyFocus: 'Weekly focus', minutes: 'Minutes',
-        settingsTitle: 'Settings', settingsText: 'Manage app language, notifications, and saved data.', language: 'Language', notifications: 'Notifications', enableNotifications: 'Enable notifications',  notificationsReady: 'Notifications enabled', notificationBlocked: 'Notifications blocked', dataManagement: 'Data management', exportData: 'Export data', importData: 'Import data', clearData: 'Delete app data', 
-        noItems: 'Nothing here yet.', subject: 'Subject or task', day: 'Day', startTime: 'Start time', endTime: 'End time', description: 'Description', save: 'Save', cancel: 'Cancel', title: 'Title', dueDate: 'Due date', priority: 'Priority', low: 'Low', medium: 'Medium', high: 'High', content: 'Content', reminderAt: 'Reminder time', edit: 'Edit', delete: 'Delete', done: 'Done', reopen: 'Reopen', saved: 'Saved', deleted: 'Deleted', completedMsg: 'Completed', dataCleared: 'App data deleted', imported: 'Data imported', exported: 'Data exported', confirmClear: 'Delete all Learn Dock data from this device?',  invalidImport: 'Could not import this file', timerDone: 'Session finished', timerSaved: 'Timer settings saved', required: 'Please fill in required fields', scheduleEmpty: 'No blocks', homeworkEmpty: 'No homework found.', notesEmpty: 'No notes found.', remindersEmpty: 'No reminders found.'
+        statsTitle: 'Study statistics', statsText: 'See how much time you spent studying and how consistent your week looks.', resetStats: 'Reset stats', totalFocus: 'Total focus', allTime: 'All time', sessions: 'Sessions', completed: 'Completed', bestDay: 'Best day', thisWeek: 'This week', weeklyFocus: 'Weekly focus', minutes: 'Minutes',
+        settingsTitle: 'Settings', settingsText: 'Manage account access, language, notifications, and app data.', language: 'Language', notifications: 'Notifications', enableNotifications: 'Enable notifications', testAlarm: 'Test alarm sound', notificationsReady: 'Notifications enabled', notificationBlocked: 'Notifications blocked', dataManagement: 'Data management', exportData: 'Export data', importData: 'Import data', clearData: 'Delete app data', 
+        noItems: 'Nothing here yet.', subject: 'Subject or task', day: 'Day', startTime: 'Start time', endTime: 'End time', description: 'Description', save: 'Save', cancel: 'Cancel', title: 'Title', dueDate: 'Due date', priority: 'Priority', low: 'Low', medium: 'Medium', high: 'High', content: 'Content', reminderAt: 'Reminder time', edit: 'Edit', delete: 'Delete', done: 'Done', reopen: 'Reopen', saved: 'Saved', deleted: 'Deleted', completedMsg: 'Completed', dataCleared: 'All data cleared', imported: 'Data imported', exported: 'Data exported', confirmClear: 'Delete all Learn Dock data from this device?', confirmStats: 'Reset all focus statistics?', invalidImport: 'Could not import this file', timerDone: 'Session finished', timerSaved: 'Timer settings saved', required: 'Please fill in required fields', scheduleEmpty: 'No blocks', homeworkEmpty: 'No homework found.', notesEmpty: 'No notes found.', remindersEmpty: 'No reminders found.'
       },
       ru: {
-        tagline: 'Планируй лучше. Учись спокойнее.', navHome: 'Главная', navSchedule: 'Расписание', navHomework: 'Домашка', navNotes: 'Заметки', navPomodoro: 'Pomodoro', navReminders: 'Напоминания', navStats: 'Статистика', navSettings: 'Настройки',
+        tagline: 'Планируй лучше. Учись спокойнее.', account: 'Аккаунт', signIn: 'Войти', createAccount: 'Создать аккаунт', resetPassword: 'Сброс пароля', sendResetLink: 'Отправить ссылку', signOut: 'Выйти', email: 'Email', password: 'Пароль', guestStatus: 'Вы используете Learn Dock без аккаунта.', signedInStatus: 'Выполнен вход:', guestModeNote: 'Можно продолжить без аккаунта.', accountLocalNote: 'Учебные данные остаются на этом устройстве. Облачную синхронизацию можно добавить позже.', authSuccess: 'Аккаунт подключён', authSignedOut: 'Вы вышли из аккаунта', resetLinkSent: 'Ссылка для сброса пароля отправлена', authError: 'Не удалось выполнить действие с аккаунтом', navHome: 'Главная', navSchedule: 'Расписание', navHomework: 'Домашка', navNotes: 'Заметки', navPomodoro: 'Pomodoro', navReminders: 'Напоминания', navStats: 'Статистика', navSettings: 'Настройки',
         heroEyebrow: 'Готов к учебе', heroTitle: 'Что будем делать сегодня?', heroText: 'Выбери нужный инструмент и держи учебный день под контролем.', scheduleCardText: 'План недели', homeworkCardText: 'Задачи и домашка', notesCardText: 'Идеи и конспекты', pomodoroCardText: 'Таймер фокуса', remindersCardText: 'Не забыть дедлайны', statsCardText: 'Прогресс', timeInApp: 'Время в приложении', startPlanning: 'Начать планировать', startTimer: 'Запустить таймер', today: 'Сегодня', todayFocus: 'Фокус сегодня', pendingHomework: 'Домашка', activeReminders: 'Напоминания',
         scheduleTitle: 'Расписание недели', scheduleText: 'Добавляй уроки, самостоятельную подготовку, практику или личные задачи на каждый день.', addBlock: 'Добавить блок',
         homeworkTitle: 'Домашка', homeworkText: 'Держи задания перед глазами и отмечай выполненные.', addHomework: 'Добавить домашку', searchHomework: 'Поиск домашки', filterAll: 'Все', filterOpen: 'Открытые', filterDone: 'Готовые',
         notesTitle: 'Заметки', notesText: 'Пиши конспекты, формулы, идеи и быстрые мысли. Всё остается на этом устройстве.', addNote: 'Добавить заметку', searchNotes: 'Поиск заметок',
         pomodoroTitle: 'Таймер Pomodoro', pomodoroText: 'Фокусируйся через учебные сессии и перерывы. Завершенное время добавляется в статистику.', focus: 'Фокус', shortBreak: 'Короткий перерыв', longBreak: 'Длинный перерыв', start: 'Старт', pause: 'Пауза', reset: 'Сброс', timerSettings: 'Настройки таймера', focusMinutes: 'Минуты фокуса', shortMinutes: 'Короткий перерыв', longMinutes: 'Длинный перерыв', saveSettings: 'Сохранить',
         remindersTitle: 'Напоминания', remindersText: 'Создавай напоминания для экзаменов, уроков, дедлайнов и учебных сессий.', addReminder: 'Добавить напоминание',
-        statsTitle: 'Статистика учебы', statsText: 'Смотри, сколько ты учился и насколько стабильной была неделя.',  totalFocus: 'Всего фокуса', allTime: 'За всё время', sessions: 'Сессии', completed: 'Завершено', bestDay: 'Лучший день', thisWeek: 'Эта неделя', weeklyFocus: 'Фокус за неделю', minutes: 'Минуты',
-        settingsTitle: 'Настройки', settingsText: 'Управляйте языком приложения, уведомлениями и сохранёнными данными.', language: 'Язык', notifications: 'Уведомления', enableNotifications: 'Включить уведомления',  notificationsReady: 'Уведомления включены', notificationBlocked: 'Уведомления заблокированы', dataManagement: 'Управление данными', exportData: 'Экспорт данных', importData: 'Импорт данных', clearData: 'Удалить данные приложения', 
-        noItems: 'Пока здесь пусто.', subject: 'Предмет или задача', day: 'День', startTime: 'Начало', endTime: 'Конец', description: 'Описание', save: 'Сохранить', cancel: 'Отмена', title: 'Название', dueDate: 'Срок', priority: 'Приоритет', low: 'Низкий', medium: 'Средний', high: 'Высокий', content: 'Текст', reminderAt: 'Время напоминания', edit: 'Изменить', delete: 'Удалить', done: 'Готово', reopen: 'Открыть', saved: 'Сохранено', deleted: 'Удалено', completedMsg: 'Выполнено', dataCleared: 'Данные приложения удалены', imported: 'Данные импортированы', exported: 'Данные экспортированы', confirmClear: 'Удалить все данные Learn Dock с этого устройства?',  invalidImport: 'Не удалось импортировать файл', timerDone: 'Сессия завершена', timerSaved: 'Настройки таймера сохранены', required: 'Заполни обязательные поля', scheduleEmpty: 'Нет блоков', homeworkEmpty: 'Домашка не найдена.', notesEmpty: 'Заметки не найдены.', remindersEmpty: 'Напоминания не найдены.'
+        statsTitle: 'Статистика учебы', statsText: 'Смотри, сколько ты учился и насколько стабильной была неделя.', resetStats: 'Сбросить статистику', totalFocus: 'Всего фокуса', allTime: 'За всё время', sessions: 'Сессии', completed: 'Завершено', bestDay: 'Лучший день', thisWeek: 'Эта неделя', weeklyFocus: 'Фокус за неделю', minutes: 'Минуты',
+        settingsTitle: 'Настройки', settingsText: 'Управляйте аккаунтом, языком, уведомлениями и данными приложения.', language: 'Язык', notifications: 'Уведомления', enableNotifications: 'Включить уведомления', testAlarm: 'Проверить звук таймера', notificationsReady: 'Уведомления включены', notificationBlocked: 'Уведомления заблокированы', dataManagement: 'Управление данными', exportData: 'Экспорт данных', importData: 'Импорт данных', clearData: 'Удалить данные приложения', 
+        noItems: 'Пока здесь пусто.', subject: 'Предмет или задача', day: 'День', startTime: 'Начало', endTime: 'Конец', description: 'Описание', save: 'Сохранить', cancel: 'Отмена', title: 'Название', dueDate: 'Срок', priority: 'Приоритет', low: 'Низкий', medium: 'Средний', high: 'Высокий', content: 'Текст', reminderAt: 'Время напоминания', edit: 'Изменить', delete: 'Удалить', done: 'Готово', reopen: 'Открыть', saved: 'Сохранено', deleted: 'Удалено', completedMsg: 'Выполнено', dataCleared: 'Данные очищены', imported: 'Данные импортированы', exported: 'Данные экспортированы', confirmClear: 'Удалить все данные Learn Dock с этого устройства?', confirmStats: 'Сбросить всю статистику фокуса?', invalidImport: 'Не удалось импортировать файл', timerDone: 'Сессия завершена', timerSaved: 'Настройки таймера сохранены', required: 'Заполни обязательные поля', scheduleEmpty: 'Нет блоков', homeworkEmpty: 'Домашка не найдена.', notesEmpty: 'Заметки не найдены.', remindersEmpty: 'Напоминания не найдены.'
       }
     };
 
@@ -1188,7 +1319,7 @@
 
     function loadState() {
       try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY));
         return { ...structuredClone(defaultState), ...saved, timer: { ...defaultState.timer, ...(saved?.timer || {}) }, stats: { ...defaultState.stats, ...(saved?.stats || {}) } };
       } catch {
         return structuredClone(defaultState);
@@ -1601,6 +1732,49 @@
       if (navigator.vibrate) navigator.vibrate([250,120,250,120,500]);
     }
 
+    function updateAuthUI(user) {
+      currentUser = user;
+      const signedOutPanel = $('#signedOutPanel');
+      const signedInPanel = $('#signedInPanel');
+      const accountStatus = $('#accountStatus');
+      const homeAuthStrip = $('#homeAuthStrip');
+      if (!signedOutPanel || !signedInPanel || !accountStatus) return;
+
+      if (user) {
+        signedOutPanel.style.display = 'none';
+        signedInPanel.style.display = 'block';
+        accountStatus.textContent = `${t('signedInStatus')} ${user.email}`;
+        if (homeAuthStrip) homeAuthStrip.style.display = 'none';
+      } else {
+        signedOutPanel.style.display = 'block';
+        signedInPanel.style.display = 'none';
+        accountStatus.textContent = t('guestStatus');
+        if (homeAuthStrip) homeAuthStrip.style.display = 'flex';
+      }
+    }
+
+    function setAuthTab(tab) {
+      $$('.auth-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.authTab === tab));
+      $('#signInForm').classList.toggle('active', tab === 'signin');
+      $('#registerForm').classList.toggle('active', tab === 'register');
+      $('#resetForm').classList.toggle('active', tab === 'reset');
+    }
+
+    async function handleAuthAction(action, email, password) {
+      try {
+        if (action === 'signin') await signInWithEmailAndPassword(auth, email, password);
+        if (action === 'register') await createUserWithEmailAndPassword(auth, email, password);
+        if (action === 'reset') {
+          await sendPasswordResetEmail(auth, email);
+          toast(t('resetLinkSent'));
+          return;
+        }
+        toast(t('authSuccess'));
+      } catch (error) {
+        toast(error?.message || t('authError'));
+      }
+    }
+
     function requestNotifications() {
       if (!('Notification' in window)) return toast(t('notificationBlocked') || 'Notifications are not available');
       Notification.requestPermission().then(p => toast(p === 'granted' ? (t('notificationsReady') || 'Notifications enabled') : (t('notificationBlocked') || 'Notifications blocked'))).catch(() => toast('Notifications unavailable'));
@@ -1692,6 +1866,13 @@
       $('#menuToggle').addEventListener('click', () => $('#nav').classList.toggle('open'));
       $('#languageToggle').addEventListener('click', () => setLanguage(state.language === 'en' ? 'ru' : 'en'));
       $('#languageSelect').addEventListener('change', e => setLanguage(e.target.value));
+      $$('.auth-tab').forEach(btn => btn.addEventListener('click', () => setAuthTab(btn.dataset.authTab)));
+      $('#homeSignIn')?.addEventListener('click', () => { switchTab('settings'); setAuthTab('signin'); });
+      $('#homeCreateAccount')?.addEventListener('click', () => { switchTab('settings'); setAuthTab('register'); });
+      $('#signInForm')?.addEventListener('submit', e => { e.preventDefault(); handleAuthAction('signin', $('#signInEmail').value.trim(), $('#signInPassword').value); });
+      $('#registerForm')?.addEventListener('submit', e => { e.preventDefault(); handleAuthAction('register', $('#registerEmail').value.trim(), $('#registerPassword').value); });
+      $('#resetForm')?.addEventListener('submit', e => { e.preventDefault(); handleAuthAction('reset', $('#resetEmail').value.trim()); });
+      $('#signOutBtn')?.addEventListener('click', async () => { try { await signOut(auth); toast(t('authSignedOut')); } catch { toast(t('authError')); } });
       $('#modalForm').addEventListener('submit', handleModalSubmit);
       $('#closeModal').addEventListener('click', closeModal);
       $('#modalBackdrop').addEventListener('click', e => { if (e.target.id === 'modalBackdrop') closeModal(); });
@@ -1705,6 +1886,7 @@
       $('#saveTimerSettings').addEventListener('click', saveTimerSettings);
       $('#clearData').addEventListener('click', () => { if (confirm(t('confirmClear'))) { state = structuredClone(defaultState); saveState(); setLanguage('en'); toast(t('dataCleared')); } });
       $('#enableNotifications').addEventListener('click', requestNotifications);
+      // Test-only alarm button removed for public release.
       $('#exportData').addEventListener('click', exportData);
       $('#importFile').addEventListener('change', e => { if (e.target.files[0]) importData(e.target.files[0]); });
       document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
@@ -1724,6 +1906,7 @@
       updateClock();
       renderAll();
       initNotifications();
+      onAuthStateChanged(auth, updateAuthUI);
       const initial = location.hash.replace('#', '');
       if (initial && document.getElementById(initial)) switchTab(initial);
       setInterval(updateClock, 1000);
