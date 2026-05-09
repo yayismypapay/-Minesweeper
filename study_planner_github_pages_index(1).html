@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A clean study planner with schedule, homework, notes, Pomodoro timer, reminders, and study statistics." />
+  <title>Learn Dock</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23050505'/%3E%3Cpath d='M16 18h22c5.5 0 10 4.5 10 10v18H26c-5.5 0-10-4.5-10-10V18Z' fill='none' stroke='%23f5f5f5' stroke-width='4'/%3E%3Cpath d='M26 28h18M26 36h12' stroke='%23f5f5f5' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <style>
+    :root {
+      --bg: #050505;
+      --bg-soft: #0a0a0a;
+      --panel: #101010;
+      --panel-2: #151515;
+      --panel-3: #1d1d1d;
+      --line: #262626;
+      --line-soft: #1d1d1d;
+      --text: #f5f5f5;
+      --muted: #a8a8a8;
+      --muted-2: #747474;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --shadow: 0 24px 80px rgba(0,0,0,.55);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+      --max: 1260px;
+      --ease: cubic-bezier(.2,.8,.2,1);
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Manrope, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,.055), transparent 32rem),
+        radial-gradient(circle at 85% 0%, rgba(255,255,255,.035), transparent 28rem),
+        linear-gradient(180deg, #050505 0%, #080808 45%, #050505 100%);
+      color: var(--text);
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 54px 54px;
+      mask-image: linear-gradient(to bottom, black, transparent 80%);
+      z-index: -1;
+    }
+
+    button, input, textarea, select {
+      font: inherit;
+      color: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      background: none;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .app {
+      width: min(100% - 32px, var(--max));
+      margin: 0 auto;
+      padding: 24px 0 52px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 14px;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 14px;
+      background: rgba(10,10,10,.82);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 16px 60px rgba(0,0,0,.35);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background:
+        linear-gradient(135deg, #1a1a1a, #080808),
+        #111;
+      border: 1px solid #333;
+      display: grid;
+      place-items: center;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+      flex: none;
+    }
+
+    .brand-mark span {
+      position: relative;
+      display: block;
+      width: 18px;
+      height: 22px;
+      border: 2px solid #f5f5f5;
+      border-left-width: 4px;
+      border-radius: 5px 8px 8px 5px;
+      box-shadow: inset 4px 0 0 rgba(255,255,255,.16);
+    }
+
+    .brand-mark span::before,
+    .brand-mark span::after {
+      content: "";
+      position: absolute;
+      left: 6px;
+      right: 3px;
+      height: 2px;
+      background: #f5f5f5;
+      border-radius: 99px;
+    }
+
+    .brand-mark span::before { top: 6px; }
+    .brand-mark span::after { top: 13px; }
+
+    .brand-title {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .brand-title strong {
+      font-size: 15px;
+      letter-spacing: -.02em;
+      white-space: nowrap;
+    }
+
+    .brand-title small {
+      color: var(--muted-2);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px;
+      background: #070707;
+      border: 1px solid var(--line-soft);
+      border-radius: 999px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .nav::-webkit-scrollbar { display: none; }
+
+    .nav-btn {
+      padding: 9px 13px;
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+      transition: .2s var(--ease);
+    }
+
+    .nav-btn:hover { color: var(--text); background: #111; }
+    .nav-btn.active { color: #050505; background: #f3f3f3; }
+
+    .top-actions {
+      display: flex;
+      gap: 8px;
+      flex: none;
+    }
+
+    .icon-btn, .primary-btn, .ghost-btn, .danger-btn, .small-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-radius: 999px;
+      transition: transform .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease), color .18s var(--ease);
+      user-select: none;
+    }
+
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--line);
+      background: #111;
+      color: var(--text);
+    }
+
+    .icon-btn:hover, .ghost-btn:hover, .small-btn:hover {
+      transform: translateY(-1px);
+      background: #1a1a1a;
+    }
+
+    .primary-btn {
+      background: #f5f5f5;
+      color: #050505;
+      padding: 11px 16px;
+      font-weight: 700;
+    }
+
+    .primary-btn:hover { transform: translateY(-1px); background: #fff; }
+
+    .ghost-btn, .danger-btn, .small-btn {
+      border: 1px solid var(--line);
+      background: #111;
+      color: var(--text);
+      padding: 10px 14px;
+    }
+
+    .danger-btn { color: #fff; border-color: rgba(239,68,68,.45); }
+    .danger-btn:hover { background: rgba(239,68,68,.15); }
+    .small-btn { padding: 8px 11px; font-size: 13px; }
+
+    .mobile-menu { display: none; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 22px;
+      align-items: stretch;
+      padding: 54px 0 22px;
+    }
+
+    .hero-card, .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .hero-card {
+      position: relative;
+      padding: clamp(24px, 4vw, 46px);
+      min-height: 420px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      width: 340px;
+      height: 340px;
+      right: -120px;
+      bottom: -120px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.06);
+      filter: blur(10px);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 12px;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      background: #0b0b0b;
+      border-radius: 999px;
+      font-size: 13px;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 0 5px rgba(34,197,94,.1);
+    }
+
+    h1 {
+      max-width: 760px;
+      margin: 24px 0 14px;
+      font-size: clamp(42px, 8vw, 86px);
+      line-height: .92;
+      letter-spacing: -.052em;
+    }
+
+    .hero p {
+      max-width: 680px;
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(16px, 2vw, 19px);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 30px;
+    }
+
+    .hero-side {
+      display: grid;
+      gap: 22px;
+    }
+
+    .clock-card {
+      padding: 28px;
+      min-height: 210px;
+    }
+
+    .clock-time {
+      font-size: clamp(44px, 7vw, 76px);
+      line-height: 1;
+      letter-spacing: -.06em;
+      margin-top: 20px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .clock-date { color: var(--muted); margin-top: 10px; }
+
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .mini-stats.compact { grid-template-columns: repeat(2, 1fr); }
+
+    .mini-stat {
+      padding: 20px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--line);
+      background: #0b0b0b;
+      min-height: 130px;
+    }
+
+    .mini-stat span { display: block; color: var(--muted-2); font-size: 13px; }
+    .mini-stat strong { display: block; margin-top: 12px; font-size: 30px; letter-spacing: -.04em; }
+
+    .section {
+      display: none;
+      animation: fadeUp .35s var(--ease) both;
+      margin-top: 22px;
+    }
+
+    .section.active { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 16px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1;
+      letter-spacing: -.05em;
+    }
+
+    .section-head p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      max-width: 680px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel { padding: 20px; }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .panel-title h3 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: -.02em;
+    }
+
+    .panel-title small { color: var(--muted-2); }
+
+    .form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .field { display: grid; gap: 7px; }
+    .field label { color: var(--muted); font-size: 13px; }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #090909;
+      border-radius: 14px;
+      padding: 12px 13px;
+      outline: none;
+      transition: border-color .18s var(--ease), background .18s var(--ease), box-shadow .18s var(--ease);
+    }
+
+    textarea { min-height: 106px; resize: vertical; }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: #555;
+      background: #0d0d0d;
+      box-shadow: 0 0 0 4px rgba(255,255,255,.04);
+    }
+
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(190px, 1fr));
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-color: #333 transparent;
+    }
+
+    .day-col {
+      border: 1px solid var(--line);
+      background: #0a0a0a;
+      border-radius: var(--radius-lg);
+      min-height: 430px;
+      padding: 13px;
+    }
+
+    .day-name {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line-soft);
+      margin-bottom: 12px;
+    }
+
+    .day-name strong { font-size: 15px; }
+    .day-name span { color: var(--muted-2); font-size: 12px; }
+
+    .item-list { display: grid; gap: 10px; }
+
+    .task-card, .note-card, .reminder-card, .homework-card {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #121212, #0c0c0c);
+      border-radius: 16px;
+      padding: 13px;
+      transition: transform .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease);
+    }
+
+    .task-card:hover, .note-card:hover, .reminder-card:hover, .homework-card:hover {
+      transform: translateY(-2px);
+      border-color: #3a3a3a;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .card-top strong { word-break: break-word; }
+
+    .meta {
+      color: var(--muted-2);
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
+    .desc {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 9px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 5px;
+      flex: none;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      background: #080808;
+      border-radius: 999px;
+      padding: 5px 9px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .status-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .list-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar .search { flex: 1; min-width: 220px; }
+
+    .empty {
+      border: 1px dashed #333;
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      text-align: center;
+      color: var(--muted-2);
+      background: rgba(255,255,255,.015);
+    }
+
+    .pomodoro-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) 360px;
+      gap: 18px;
+    }
+
+    .timer-card {
+      min-height: 510px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: clamp(24px, 5vw, 44px);
+    }
+
+    .timer-ring {
+      width: min(68vw, 330px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background:
+        conic-gradient(#f5f5f5 var(--progress, 0deg), #1b1b1b 0deg),
+        #111;
+      box-shadow: inset 0 0 0 1px var(--line), 0 25px 80px rgba(0,0,0,.45);
+      margin: 0 auto 30px;
+      position: relative;
+    }
+
+    .timer-ring::before {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      border-radius: 50%;
+      background: #070707;
+      border: 1px solid var(--line);
+    }
+
+    .timer-time {
+      position: relative;
+      z-index: 1;
+      font-size: clamp(48px, 10vw, 76px);
+      line-height: 1;
+      letter-spacing: -.045em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timer-mode {
+      position: relative;
+      z-index: 1;
+      color: var(--muted);
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    .timer-controls {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .mode-tabs {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .stats-grid.three { grid-template-columns: repeat(3, 1fr); }
+
+    .stat-card {
+      padding: 20px;
+      border: 1px solid var(--line);
+      background: #0a0a0a;
+      border-radius: var(--radius-lg);
+      min-height: 145px;
+    }
+
+    .stat-card span { color: var(--muted-2); font-size: 13px; }
+    .stat-card strong { display: block; margin-top: 15px; font-size: clamp(28px, 5vw, 42px); letter-spacing: -.05em; }
+    .stat-card small { color: var(--muted); }
+
+    .bar-chart {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      height: 230px;
+      align-items: end;
+      border: 1px solid var(--line);
+      background: #080808;
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .bar-wrap {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: end;
+      gap: 9px;
+      text-align: center;
+      color: var(--muted-2);
+      font-size: 12px;
+      min-width: 0;
+    }
+
+    .bar {
+      min-height: 4px;
+      border-radius: 999px 999px 6px 6px;
+      background: #f5f5f5;
+      opacity: .92;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .footer {
+      margin-top: 40px;
+      padding: 24px;
+      text-align: center;
+      color: var(--muted-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: rgba(255,255,255,.015);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.72);
+      backdrop-filter: blur(12px);
+      z-index: 90;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+
+    .modal-backdrop.show { display: flex; }
+
+    .modal {
+      width: min(100%, 520px);
+      max-height: min(760px, 92vh);
+      overflow: auto;
+      background: #0b0b0b;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+      animation: modalIn .22s var(--ease) both;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(.98) translateY(8px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .modal-head h3 { margin: 0; font-size: 22px; letter-spacing: -.03em; }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 120;
+      display: grid;
+      gap: 8px;
+      width: min(360px, calc(100vw - 40px));
+    }
+
+    .toast-item {
+      background: #111;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 13px 15px;
+      color: var(--text);
+      box-shadow: 0 14px 50px rgba(0,0,0,.45);
+      animation: fadeUp .22s var(--ease) both;
+    }
+
+    .desktop-hidden { display: none; }
+
+    @media (max-width: 1080px) {
+      .hero { grid-template-columns: 1fr; }
+      .grid-2, .pomodoro-layout { grid-template-columns: 1fr; }
+      .list-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stats-grid, .stats-grid.three { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 820px) {
+      .app { width: min(100% - 22px, var(--max)); padding-top: 12px; }
+      .topbar { border-radius: 24px; align-items: stretch; flex-wrap: wrap; top: 8px; }
+      .brand { flex: 1; }
+      .top-actions { margin-left: auto; }
+      .mobile-menu { display: inline-flex; }
+      .nav {
+        order: 3;
+        width: 100%;
+        display: none;
+        border-radius: 18px;
+        padding: 8px;
+      }
+      .nav.open { display: grid; grid-template-columns: repeat(2, 1fr); }
+      .nav-btn { text-align: center; }
+      .hero { padding-top: 28px; }
+      .hero-card { min-height: auto; }
+      .mini-stats { grid-template-columns: 1fr; }
+      .section-head { align-items: start; flex-direction: column; }
+      .list-grid { grid-template-columns: 1fr; }
+      .settings-grid { grid-template-columns: 1fr; }
+      .row { grid-template-columns: 1fr; }
+      .clock-card { min-height: auto; }
+    }
+
+    @media (max-width: 540px) {
+      .brand-title small { display: none; }
+      .icon-btn { width: 39px; height: 39px; }
+      .mini-stats.compact { grid-template-columns: 1fr; }
+      .hero-actions, .timer-controls { flex-direction: column; }
+      .hero-actions button, .timer-controls button { width: 100%; }
+      .panel { padding: 15px; border-radius: 22px; }
+      .stats-grid, .stats-grid.three { grid-template-columns: 1fr; }
+      .bar-chart { overflow-x: auto; grid-template-columns: repeat(7, 48px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <a class="brand" href="#home" data-tab-link="home" aria-label="Study Planner home">
+        <div class="brand-mark" aria-hidden="true"><span></span></div>
+        <div class="brand-title">
+          <strong>Learn Dock</strong>
+          <small data-i18n="tagline">Plan better. Study calmly.</small>
+        </div>
+      </a>
+
+      <nav class="nav" id="nav" aria-label="Main navigation">
+        <button class="nav-btn active" data-tab="home" data-i18n="navHome">Home</button>
+        <button class="nav-btn" data-tab="schedule" data-i18n="navSchedule">Schedule</button>
+        <button class="nav-btn" data-tab="homework" data-i18n="navHomework">Homework</button>
+        <button class="nav-btn" data-tab="notes" data-i18n="navNotes">Notes</button>
+        <button class="nav-btn" data-tab="pomodoro" data-i18n="navPomodoro">Pomodoro</button>
+        <button class="nav-btn" data-tab="reminders" data-i18n="navReminders">Reminders</button>
+        <button class="nav-btn" data-tab="stats" data-i18n="navStats">Stats</button>
+        <button class="nav-btn" data-tab="settings" data-i18n="navSettings">Settings</button>
+      </nav>
+
+      <div class="top-actions">
+        <button class="icon-btn" id="languageToggle" title="Change language" aria-label="Change language">EN</button>
+        <button class="icon-btn mobile-menu" id="menuToggle" aria-label="Open menu">☰</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero section active" id="home">
+        <div class="hero-card">
+          <div>
+            <span class="eyebrow" data-i18n="heroEyebrow">Private, fast, no account required</span>
+            <h1 data-i18n="heroTitle">A clean place to organize your study life.</h1>
+            <p data-i18n="heroText">Build your weekly schedule, track homework, write notes, run focus sessions, and keep study statistics in one lightweight dashboard.</p>
+            <div class="hero-actions">
+              <button class="primary-btn" data-tab-open="schedule" data-i18n="startPlanning">Start planning</button>
+              <button class="ghost-btn" data-tab-open="pomodoro" data-i18n="startTimer">Start focus timer</button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="hero-side">
+          <div class="panel clock-card">
+            <div class="panel-title">
+              <h3 data-i18n="today">Today</h3>
+              <small id="timezoneLabel"></small>
+            </div>
+            <div class="clock-time" id="clockTime">00:00</div>
+            <div class="clock-date" id="clockDate">Loading</div>
+          </div>
+
+          <div class="mini-stats compact">
+            <div class="mini-stat">
+              <span data-i18n="pendingHomework">Homework</span>
+              <strong id="homeHomework">0</strong>
+            </div>
+            <div class="mini-stat">
+              <span data-i18n="activeReminders">Reminders</span>
+              <strong id="homeReminders">0</strong>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="section" id="schedule">
+        <div class="section-head">
+          <div>
+            <h2 data-i18n="scheduleTitle">Weekly schedule</h2>
+            <p data-i18n="scheduleText">Add lessons, self-study blocks, practice sessions, or personal tasks for each day.</p>
+          </div>
+          <button class="primary-btn" data-modal="schedule" data-i18n="addBlock">Add block</button>
+        </div>
+        <div class="panel">
+          <div class="week-grid" id="scheduleGrid"></div>
+        </div>
+      </section>
+
+      <section class="section" id="homework">
+        <div class="section-head">
+          <div>
+            <h2 data-i18n="homeworkTitle">Homework</h2>
+            <p data-i18n="homeworkText">Keep tasks visible and mark them done when finished.</p>
+          </div>
+          <button class="primary-btn" data-modal="homework" data-i18n="addHomework">Add homework</button>
+        </div>
+        <div class="toolbar">
+          <input class="search" id="homeworkSearch" type="search" data-i18n-placeholder="searchHomework" placeholder="Search homework" />
+          <select id="homeworkFilter" aria-label="Filter homework">
+            <option value="all" data-i18n="filterAll">All</option>
+            <option value="open" data-i18n="filterOpen">Open</option>
+            <option value="done" data-i18n="filterDone">Done</option>
+          </select>
+        </div>
+        <div class="list-grid" id="homeworkList"></div>
+      </section>
+
+      <section class="section" id="notes">
+        <div class="section-head">
+          <div>
+            <h2 data-i18n="notesTitle">Notes</h2>
+            <p data-i18n="notesText">Write summaries, formulas, ideas, and quick thoughts. Everything stays on this device.</p>
+          </div>
+          <button class="primary-btn" data-modal="note" data-i18n="addNote">Add note</button>
+        </div>
+        <div class="toolbar">
+          <input class="search" id="notesSearch" type="search" data-i18n-placeholder="searchNotes" placeholder="Search notes" />
+        </div>
+        <div class="list-grid" id="notesList"></div>
+      </section>
+
+      <section class="section" id="pomodoro">
+        <div class="section-head">
+          <div>
+            <h2 data-i18n="pomodoroTitle">Pomodoro timer</h2>
+            <p data-i18n="pomodoroText">Stay focused with work sessions and breaks. Completed focus time is added to your statistics.</p>
+          </div>
+        </div>
+        <div class="pomodoro-layout">
+          <div class="panel timer-card">
+            <div>
+              <div class="mode-tabs">
+                <button class="small-btn" data-mode="focus" data-i18n="focus">Focus</button>
+                <button class="small-btn" data-mode="short" data-i18n="shortBreak">Short break</button>
+                <button class="small-btn" data-mode="long" data-i18n="longBreak">Long break</button>
+              </div>
+              <div class="timer-ring" id="timerRing">
+                <div>
+                  <div class="timer-time" id="timerTime">25:00</div>
+                  <div class="timer-mode" id="timerMode">Focus</div>
+                </div>
+              </div>
+              <div class="timer-controls">
+                <button class="primary-btn" id="timerStart" data-i18n="start">Start</button>
+                <button class="ghost-btn" id="timerPause" data-i18n="pause">Pause</button>
+                <button class="ghost-btn" id="timerReset" data-i18n="reset">Reset</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">
+              <h3 data-i18n="timerSettings">Timer settings</h3>
+            </div>
+            <div class="form">
+              <div class="field">
+                <label data-i18n="focusMinutes">Focus minutes</label>
+                <input id="focusMinutes" type="number" min="1" max="180" value="25" />
+              </div>
+              <div class="field">
+                <label data-i18n="shortMinutes">Short break minutes</label>
+                <input id="shortMinutes" type="number" min="1" max="60" value="5" />
+              </div>
+              <div class="field">
+                <label data-i18n="longMinutes">Long break minutes</label>
+                <input id="longMinutes" type="number" min="1" max="90" value="15" />
+              </div>
+              <button class="primary-btn" id="saveTimerSettings" data-i18n="saveSettings">Save settings</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="reminders">
+        <div class="section-head">
+          <div>
+            <h2 data-i18n="remindersTitle">Reminders</h2>
+            <p data-i18n="remindersText">Create reminders for exams, lessons, deadlines, and study sessions.</p>
+          </div>
+          <button class="primary-btn" data-modal="reminder" data-i18n="addReminder">Add reminder</button>
+        </div>
+        <div class="list-grid" id="remindersList"></div>
+      </section>
+
+      <section class="section" id="stats">
+        <div class="section-head">
+          <div>
+            <h2 data-i18n="statsTitle">Study statistics</h2>
+            <p data-i18n="statsText">See how much time you spent studying and how consistent your week looks.</p>
+          </div>
+          
+        </div>
+        <div class="stats-grid three">
+          <div class="stat-card"><span data-i18n="totalFocus">Total focus</span><strong id="statTotal">0m</strong><small data-i18n="allTime">All time</small></div>
+          <div class="stat-card"><span data-i18n="sessions">Sessions</span><strong id="statSessions">0</strong><small data-i18n="completed">Completed</small></div>
+          <div class="stat-card"><span data-i18n="bestDay">Best day</span><strong id="statBest">0m</strong><small data-i18n="thisWeek">This week</small></div>
+        </div>
+        <div class="panel" style="margin-top:18px">
+          <div class="panel-title">
+            <h3 data-i18n="weeklyFocus">Weekly focus</h3>
+            <small data-i18n="minutes">Minutes</small>
+          </div>
+          <div class="bar-chart" id="weeklyChart"></div>
+        </div>
+      </section>
+
+      <section class="section" id="settings">
+        <div class="section-head">
+          <div>
+            <h2 data-i18n="settingsTitle">Settings</h2>
+            <p data-i18n="settingsText">Manage language, export your data, or clear saved information from this browser.</p>
+          </div>
+        </div>
+        <div class="settings-grid">
+          <div class="panel">
+            <div class="panel-title"><h3 data-i18n="language">Language</h3></div>
+            <div class="form">
+              <select id="languageSelect">
+                <option value="en">English</option>
+                <option value="ru">Русский</option>
+              </select>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-title"><h3 data-i18n="dataManagement">Data management</h3></div>
+            <div class="form">
+              <button class="ghost-btn" id="exportData" data-i18n="exportData">Export data</button>
+              <label class="ghost-btn" style="cursor:pointer">
+                <span data-i18n="importData">Import data</span>
+                <input id="importFile" type="file" accept="application/json" hidden />
+              </label>
+              <button class="danger-btn" id="clearData" data-i18n="clearData">Clear all data</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span data-i18n="footerText">Made for focused students. Your data stays in your browser.</span>
+    </footer>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <h3 id="modalTitle">Add item</h3>
+        <button class="icon-btn" id="closeModal" aria-label="Close">×</button>
+      </div>
+      <form class="form" id="modalForm"></form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORAGE_KEY = 'studyPlanner.public.v1';
+
+    const i18n = {
+      en: {
+        tagline: 'Plan better. Study calmly.', navHome: 'Home', navSchedule: 'Schedule', navHomework: 'Homework', navNotes: 'Notes', navPomodoro: 'Pomodoro', navReminders: 'Reminders', navStats: 'Stats', navSettings: 'Settings',
+        heroEyebrow: 'Private, fast, no account required', heroTitle: 'A clean place to organize your study life.', heroText: 'Build your weekly schedule, track homework, write notes, run focus sessions, and keep study statistics in one lightweight dashboard.', startPlanning: 'Start planning', startTimer: 'Start focus timer', today: 'Today', todayFocus: 'Focus today', pendingHomework: 'Homework', activeReminders: 'Reminders',
+        scheduleTitle: 'Weekly schedule', scheduleText: 'Add lessons, self-study blocks, practice sessions, or personal tasks for each day.', addBlock: 'Add block',
+        homeworkTitle: 'Homework', homeworkText: 'Keep tasks visible and mark them done when finished.', addHomework: 'Add homework', searchHomework: 'Search homework', filterAll: 'All', filterOpen: 'Open', filterDone: 'Done',
+        notesTitle: 'Notes', notesText: 'Write summaries, formulas, ideas, and quick thoughts. Everything stays on this device.', addNote: 'Add note', searchNotes: 'Search notes',
+        pomodoroTitle: 'Pomodoro timer', pomodoroText: 'Stay focused with work sessions and breaks. Completed focus time is added to your statistics.', focus: 'Focus', shortBreak: 'Short break', longBreak: 'Long break', start: 'Start', pause: 'Pause', reset: 'Reset', timerSettings: 'Timer settings', focusMinutes: 'Focus minutes', shortMinutes: 'Short break minutes', longMinutes: 'Long break minutes', saveSettings: 'Save settings',
+        remindersTitle: 'Reminders', remindersText: 'Create reminders for exams, lessons, deadlines, and study sessions.', addReminder: 'Add reminder',
+        statsTitle: 'Study statistics', statsText: 'See how much time you spent studying and how consistent your week looks.', resetStats: 'Reset stats', totalFocus: 'Total focus', allTime: 'All time', sessions: 'Sessions', completed: 'Completed', bestDay: 'Best day', thisWeek: 'This week', weeklyFocus: 'Weekly focus', minutes: 'Minutes',
+        settingsTitle: 'Settings', settingsText: 'Manage language, export your data, or clear saved information from this browser.', language: 'Language', dataManagement: 'Data management', exportData: 'Export data', importData: 'Import data', clearData: 'Clear all data', footerText: 'Made for focused students. Your data stays in your browser.',
+        noItems: 'Nothing here yet.', subject: 'Subject or task', day: 'Day', startTime: 'Start time', endTime: 'End time', description: 'Description', save: 'Save', cancel: 'Cancel', title: 'Title', dueDate: 'Due date', priority: 'Priority', low: 'Low', medium: 'Medium', high: 'High', content: 'Content', reminderAt: 'Reminder time', edit: 'Edit', delete: 'Delete', done: 'Done', reopen: 'Reopen', saved: 'Saved', deleted: 'Deleted', completedMsg: 'Completed', dataCleared: 'All data cleared', imported: 'Data imported', exported: 'Data exported', confirmClear: 'Clear all saved data from this browser?', confirmStats: 'Reset all focus statistics?', invalidImport: 'Could not import this file', timerDone: 'Session finished', timerSaved: 'Timer settings saved', required: 'Please fill in required fields', scheduleEmpty: 'No blocks', homeworkEmpty: 'No homework found.', notesEmpty: 'No notes found.', remindersEmpty: 'No reminders found.'
+      },
+      ru: {
+        tagline: 'Планируй лучше. Учись спокойнее.', navHome: 'Главная', navSchedule: 'Расписание', navHomework: 'Домашка', navNotes: 'Заметки', navPomodoro: 'Pomodoro', navReminders: 'Напоминания', navStats: 'Статистика', navSettings: 'Настройки',
+        heroEyebrow: 'Быстро, приватно, без аккаунта', heroTitle: 'Чистое место для учебы и порядка.', heroText: 'Составляй расписание, отслеживай домашку, пиши заметки, запускай фокус-сессии и смотри статистику в одном легком дашборде.', startPlanning: 'Начать планировать', startTimer: 'Запустить таймер', today: 'Сегодня', todayFocus: 'Фокус сегодня', pendingHomework: 'Домашка', activeReminders: 'Напоминания',
+        scheduleTitle: 'Расписание недели', scheduleText: 'Добавляй уроки, самостоятельную подготовку, практику или личные задачи на каждый день.', addBlock: 'Добавить блок',
+        homeworkTitle: 'Домашка', homeworkText: 'Держи задания перед глазами и отмечай выполненные.', addHomework: 'Добавить домашку', searchHomework: 'Поиск домашки', filterAll: 'Все', filterOpen: 'Открытые', filterDone: 'Готовые',
+        notesTitle: 'Заметки', notesText: 'Пиши конспекты, формулы, идеи и быстрые мысли. Всё остается на этом устройстве.', addNote: 'Добавить заметку', searchNotes: 'Поиск заметок',
+        pomodoroTitle: 'Таймер Pomodoro', pomodoroText: 'Фокусируйся через учебные сессии и перерывы. Завершенное время добавляется в статистику.', focus: 'Фокус', shortBreak: 'Короткий перерыв', longBreak: 'Длинный перерыв', start: 'Старт', pause: 'Пауза', reset: 'Сброс', timerSettings: 'Настройки таймера', focusMinutes: 'Минуты фокуса', shortMinutes: 'Короткий перерыв', longMinutes: 'Длинный перерыв', saveSettings: 'Сохранить',
+        remindersTitle: 'Напоминания', remindersText: 'Создавай напоминания для экзаменов, уроков, дедлайнов и учебных сессий.', addReminder: 'Добавить напоминание',
+        statsTitle: 'Статистика учебы', statsText: 'Смотри, сколько ты учился и насколько стабильной была неделя.', resetStats: 'Сбросить статистику', totalFocus: 'Всего фокуса', allTime: 'За всё время', sessions: 'Сессии', completed: 'Завершено', bestDay: 'Лучший день', thisWeek: 'Эта неделя', weeklyFocus: 'Фокус за неделю', minutes: 'Минуты',
+        settingsTitle: 'Настройки', settingsText: 'Управляй языком, экспортируй данные или очищай сохранения в этом браузере.', language: 'Язык', dataManagement: 'Управление данными', exportData: 'Экспорт данных', importData: 'Импорт данных', clearData: 'Очистить всё', footerText: 'Сделано для сфокусированных учеников. Данные остаются в браузере.',
+        noItems: 'Пока здесь пусто.', subject: 'Предмет или задача', day: 'День', startTime: 'Начало', endTime: 'Конец', description: 'Описание', save: 'Сохранить', cancel: 'Отмена', title: 'Название', dueDate: 'Срок', priority: 'Приоритет', low: 'Низкий', medium: 'Средний', high: 'Высокий', content: 'Текст', reminderAt: 'Время напоминания', edit: 'Изменить', delete: 'Удалить', done: 'Готово', reopen: 'Открыть', saved: 'Сохранено', deleted: 'Удалено', completedMsg: 'Выполнено', dataCleared: 'Данные очищены', imported: 'Данные импортированы', exported: 'Данные экспортированы', confirmClear: 'Очистить все данные из этого браузера?', confirmStats: 'Сбросить всю статистику фокуса?', invalidImport: 'Не удалось импортировать файл', timerDone: 'Сессия завершена', timerSaved: 'Настройки таймера сохранены', required: 'Заполни обязательные поля', scheduleEmpty: 'Нет блоков', homeworkEmpty: 'Домашка не найдена.', notesEmpty: 'Заметки не найдены.', remindersEmpty: 'Напоминания не найдены.'
+      }
+    };
+
+    const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+    const daysRu = ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
+
+    const defaultState = {
+      language: 'en',
+      schedule: [],
+      homework: [],
+      notes: [],
+      reminders: [],
+      stats: { totalMinutes: 0, sessions: 0, byDate: {} },
+      timer: { focus: 25, short: 5, long: 15 }
+    };
+
+    let state = loadState();
+    let modalContext = null;
+    let timer = {
+      mode: 'focus',
+      remaining: state.timer.focus * 60,
+      total: state.timer.focus * 60,
+      running: false,
+      interval: null,
+      startedAt: null
+    };
+
+    const $ = (selector, root = document) => root.querySelector(selector);
+    const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+    const t = (key) => i18n[state.language][key] || i18n.en[key] || key;
+    const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+    const todayKey = () => new Date().toISOString().slice(0, 10);
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        return { ...structuredClone(defaultState), ...saved, timer: { ...defaultState.timer, ...(saved?.timer || {}) }, stats: { ...defaultState.stats, ...(saved?.stats || {}) } };
+      } catch {
+        return structuredClone(defaultState);
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      renderAll();
+    }
+
+    function escapeHtml(str = '') {
+      return String(str).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    }
+
+    function formatMinutes(min) {
+      min = Math.max(0, Math.round(min || 0));
+      if (min < 60) return `${min}m`;
+      const h = Math.floor(min / 60);
+      const m = min % 60;
+      return m ? `${h}h ${m}m` : `${h}h`;
+    }
+
+    function formatDateTime(value) {
+      if (!value) return '';
+      const date = new Date(value);
+      return new Intl.DateTimeFormat(state.language === 'ru' ? 'ru-RU' : 'en-US', { dateStyle: 'medium', timeStyle: 'short', hour12: false }).format(date);
+    }
+
+    function formatScheduleTime(value) {
+      if (!value) return '';
+      const clean = String(value).trim();
+      const upper = clean.toUpperCase().replace(/ +/g, ' ');
+      const ampm = upper.match(/^([0-9]{1,2}):([0-9]{2}) ?(AM|PM)$/);
+      if (ampm) {
+        let h = parseInt(ampm[1], 10);
+        const m = ampm[2];
+        const p = ampm[3];
+        if (p === 'PM' && h !== 12) h += 12;
+        if (p === 'AM' && h === 12) h = 0;
+        return `${String(h).padStart(2, '0')}:${m}`;
+      }
+      const simple = clean.match(/^([0-9]{1,2}):([0-9]{2})/);
+      if (simple) return `${String(parseInt(simple[1], 10)).padStart(2, '0')}:${simple[2]}`;
+      return clean;
+    }
+
+    function setLanguage(lang) {
+      state.language = lang;
+      document.documentElement.lang = lang;
+      $('#languageToggle').textContent = lang.toUpperCase();
+      $('#languageSelect').value = lang;
+      $$('[data-i18n]').forEach(el => el.textContent = t(el.dataset.i18n));
+      $$('[data-i18n-placeholder]').forEach(el => el.placeholder = t(el.dataset.i18nPlaceholder));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      renderAll();
+    }
+
+    function switchTab(id) {
+      $$('.section').forEach(s => s.classList.toggle('active', s.id === id));
+      $$('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+      $('#nav').classList.remove('open');
+      history.replaceState(null, '', `#${id}`);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderSchedule() {
+      const grid = $('#scheduleGrid');
+      grid.innerHTML = days.map((day, idx) => {
+        const items = state.schedule.filter(item => item.day === day).sort((a,b) => (a.start || '').localeCompare(b.start || ''));
+        const dayLabel = state.language === 'ru' ? daysRu[idx] : day;
+        return `<div class="day-col">
+          <div class="day-name"><strong>${dayLabel}</strong><span>${items.length || t('scheduleEmpty')}</span></div>
+          <div class="item-list">
+            ${items.map(item => `<article class="task-card">
+              <div class="card-top">
+                <div><strong>${escapeHtml(item.title)}</strong><div class="meta">${escapeHtml(formatScheduleTime(item.start))} — ${escapeHtml(formatScheduleTime(item.end))}</div></div>
+                <div class="card-actions">
+                  <button class="small-btn" onclick="openModal('schedule','${item.id}')">${t('edit')}</button>
+                  <button class="small-btn" onclick="deleteItem('schedule','${item.id}')">×</button>
+                </div>
+              </div>
+              ${item.description ? `<div class="desc">${escapeHtml(item.description)}</div>` : ''}
+            </article>`).join('') || `<div class="empty">${t('scheduleEmpty')}</div>`}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderHomework() {
+      const query = ($('#homeworkSearch')?.value || '').toLowerCase();
+      const filter = $('#homeworkFilter')?.value || 'all';
+      const list = $('#homeworkList');
+      let items = [...state.homework].sort((a,b) => (a.due || '').localeCompare(b.due || ''));
+      if (filter === 'open') items = items.filter(x => !x.done);
+      if (filter === 'done') items = items.filter(x => x.done);
+      if (query) items = items.filter(x => `${x.title} ${x.description} ${x.priority}`.toLowerCase().includes(query));
+      list.innerHTML = items.map(item => `<article class="homework-card">
+        <div class="card-top">
+          <div><strong style="text-decoration:${item.done ? 'line-through' : 'none'}">${escapeHtml(item.title)}</strong><div class="meta">${item.due ? escapeHtml(item.due) : ''}</div></div>
+          <div class="card-actions"><button class="small-btn" onclick="openModal('homework','${item.id}')">${t('edit')}</button><button class="small-btn" onclick="deleteItem('homework','${item.id}')">×</button></div>
+        </div>
+        ${item.description ? `<div class="desc">${escapeHtml(item.description)}</div>` : ''}
+        <div class="status-line"><span class="chip">${t(item.priority || 'medium')}</span><button class="small-btn" onclick="toggleHomework('${item.id}')">${item.done ? t('reopen') : t('done')}</button></div>
+      </article>`).join('') || `<div class="empty">${t('homeworkEmpty')}</div>`;
+    }
+
+    function renderNotes() {
+      const query = ($('#notesSearch')?.value || '').toLowerCase();
+      const list = $('#notesList');
+      let items = [...state.notes].sort((a,b) => b.updated - a.updated);
+      if (query) items = items.filter(x => `${x.title} ${x.content}`.toLowerCase().includes(query));
+      list.innerHTML = items.map(item => `<article class="note-card">
+        <div class="card-top">
+          <div><strong>${escapeHtml(item.title)}</strong><div class="meta">${new Date(item.updated).toLocaleDateString(state.language === 'ru' ? 'ru-RU' : 'en-US')}</div></div>
+          <div class="card-actions"><button class="small-btn" onclick="openModal('note','${item.id}')">${t('edit')}</button><button class="small-btn" onclick="deleteItem('notes','${item.id}')">×</button></div>
+        </div>
+        <div class="desc">${escapeHtml(item.content).slice(0, 280)}${item.content.length > 280 ? '...' : ''}</div>
+      </article>`).join('') || `<div class="empty">${t('notesEmpty')}</div>`;
+    }
+
+    function renderReminders() {
+      const list = $('#remindersList');
+      const items = [...state.reminders].sort((a,b) => new Date(a.at) - new Date(b.at));
+      list.innerHTML = items.map(item => `<article class="reminder-card">
+        <div class="card-top">
+          <div><strong>${escapeHtml(item.title)}</strong><div class="meta">${formatDateTime(item.at)}</div></div>
+          <div class="card-actions"><button class="small-btn" onclick="openModal('reminder','${item.id}')">${t('edit')}</button><button class="small-btn" onclick="deleteItem('reminders','${item.id}')">×</button></div>
+        </div>
+        ${item.description ? `<div class="desc">${escapeHtml(item.description)}</div>` : ''}
+      </article>`).join('') || `<div class="empty">${t('remindersEmpty')}</div>`;
+    }
+
+    function renderStats() {
+      const byDate = state.stats.byDate || {};
+      const today = todayKey();
+      const weekDates = getWeekDates();
+      const weekValues = weekDates.map(d => byDate[d] || 0);
+      $('#statTotal').textContent = formatMinutes(state.stats.totalMinutes);
+      $('#statSessions').textContent = state.stats.sessions || 0;
+      $('#statBest').textContent = formatMinutes(Math.max(0, ...weekValues));
+      const max = Math.max(1, ...weekValues);
+      $('#weeklyChart').innerHTML = weekDates.map((date, i) => {
+        const label = state.language === 'ru' ? daysRu[i].slice(0,2) : days[i].slice(0,3);
+        const value = weekValues[i];
+        return `<div class="bar-wrap"><div class="bar" title="${value}m" style="height:${Math.max(4, value / max * 100)}%"></div><span>${label}</span></div>`;
+      }).join('');
+      $('#homeHomework').textContent = state.homework.filter(x => !x.done).length;
+      $('#homeReminders').textContent = state.reminders.length;
+    }
+
+    function getWeekDates() {
+      const now = new Date();
+      const day = (now.getDay() + 6) % 7;
+      const monday = new Date(now);
+      monday.setDate(now.getDate() - day);
+      return Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        return d.toISOString().slice(0, 10);
+      });
+    }
+
+    function renderTimer() {
+      const min = Math.floor(timer.remaining / 60).toString().padStart(2, '0');
+      const sec = Math.floor(timer.remaining % 60).toString().padStart(2, '0');
+      $('#timerTime').textContent = `${min}:${sec}`;
+      $('#timerMode').textContent = timer.mode === 'focus' ? t('focus') : timer.mode === 'short' ? t('shortBreak') : t('longBreak');
+      const progress = timer.total ? (1 - timer.remaining / timer.total) * 360 : 0;
+      $('#timerRing').style.setProperty('--progress', `${progress}deg`);
+      $('#focusMinutes').value = state.timer.focus;
+      $('#shortMinutes').value = state.timer.short;
+      $('#longMinutes').value = state.timer.long;
+      $$('[data-mode]').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === timer.mode));
+    }
+
+    function renderAll() {
+      renderSchedule();
+      renderHomework();
+      renderNotes();
+      renderReminders();
+      renderStats();
+      renderTimer();
+    }
+
+    function openModal(type, id = null) {
+      modalContext = { type, id };
+      const form = $('#modalForm');
+      const data = id ? getCollection(type).find(x => x.id === id) : null;
+      let title = '';
+      let html = '';
+
+      if (type === 'schedule') {
+        title = id ? t('edit') : t('addBlock');
+        html = `
+          ${field('title', t('subject'), data?.title || '', true)}
+          <div class="field"><label>${t('day')}</label><select name="day">${days.map((d,i) => `<option value="${d}" ${data?.day === d ? 'selected' : ''}>${state.language === 'ru' ? daysRu[i] : d}</option>`).join('')}</select></div>
+          <div class="row">${field('start', t('startTime'), data?.start || '', true, 'time')}${field('end', t('endTime'), data?.end || '', true, 'time')}</div>
+          ${textarea('description', t('description'), data?.description || '')}
+          ${submitButtons()}`;
+      }
+
+      if (type === 'homework') {
+        title = id ? t('edit') : t('addHomework');
+        html = `
+          ${field('title', t('title'), data?.title || '', true)}
+          ${field('due', t('dueDate'), data?.due || '', false, 'date')}
+          <div class="field"><label>${t('priority')}</label><select name="priority"><option value="low" ${data?.priority === 'low' ? 'selected' : ''}>${t('low')}</option><option value="medium" ${!data || data?.priority === 'medium' ? 'selected' : ''}>${t('medium')}</option><option value="high" ${data?.priority === 'high' ? 'selected' : ''}>${t('high')}</option></select></div>
+          ${textarea('description', t('description'), data?.description || '')}
+          ${submitButtons()}`;
+      }
+
+      if (type === 'note') {
+        title = id ? t('edit') : t('addNote');
+        html = `${field('title', t('title'), data?.title || '', true)}${textarea('content', t('content'), data?.content || '', true)}${submitButtons()}`;
+      }
+
+      if (type === 'reminder') {
+        title = id ? t('edit') : t('addReminder');
+        html = `${field('title', t('title'), data?.title || '', true)}${field('at', t('reminderAt'), data?.at || '', true, 'datetime-local')}${textarea('description', t('description'), data?.description || '')}${submitButtons()}`;
+      }
+
+      $('#modalTitle').textContent = title;
+      form.innerHTML = html;
+      $('#modalBackdrop').classList.add('show');
+      $('#modalBackdrop').setAttribute('aria-hidden', 'false');
+      const firstInput = form.querySelector('input, textarea, select');
+      if (firstInput) setTimeout(() => firstInput.focus(), 60);
+    }
+
+    function closeModal() {
+      $('#modalBackdrop').classList.remove('show');
+      $('#modalBackdrop').setAttribute('aria-hidden', 'true');
+      modalContext = null;
+    }
+
+    function field(name, label, value = '', required = false, type = 'text') {
+      const extra = type === 'time' ? ' step="300" lang="ru-RU" inputmode="numeric"' : '';
+      return `<div class="field"><label>${label}</label><input name="${name}" type="${type}" value="${escapeHtml(value)}"${extra} ${required ? 'required' : ''}></div>`;
+    }
+
+    function textarea(name, label, value = '', required = false) {
+      return `<div class="field"><label>${label}</label><textarea name="${name}" ${required ? 'required' : ''}>${escapeHtml(value)}</textarea></div>`;
+    }
+
+    function submitButtons() {
+      return `<div class="row"><button type="submit" class="primary-btn">${t('save')}</button><button type="button" class="ghost-btn" onclick="closeModal()">${t('cancel')}</button></div>`;
+    }
+
+    function getCollection(type) {
+      if (type === 'schedule') return state.schedule;
+      if (type === 'homework') return state.homework;
+      if (type === 'note' || type === 'notes') return state.notes;
+      if (type === 'reminder' || type === 'reminders') return state.reminders;
+      return [];
+    }
+
+    function handleModalSubmit(event) {
+      event.preventDefault();
+      if (!modalContext) return;
+      const fd = new FormData(event.currentTarget);
+      const values = Object.fromEntries(fd.entries());
+      const collection = getCollection(modalContext.type);
+      if (!values.title) return toast(t('required'));
+      const existing = modalContext.id ? collection.find(x => x.id === modalContext.id) : null;
+
+      if (modalContext.type === 'schedule') {
+        const item = { id: existing?.id || uid(), title: values.title, day: values.day, start: values.start, end: values.end, description: values.description };
+        upsert(collection, item);
+      }
+      if (modalContext.type === 'homework') {
+        const item = { id: existing?.id || uid(), title: values.title, due: values.due, priority: values.priority, description: values.description, done: existing?.done || false };
+        upsert(collection, item);
+      }
+      if (modalContext.type === 'note') {
+        const item = { id: existing?.id || uid(), title: values.title, content: values.content, updated: Date.now() };
+        upsert(collection, item);
+      }
+      if (modalContext.type === 'reminder') {
+        const item = { id: existing?.id || uid(), title: values.title, at: values.at, description: values.description };
+        upsert(collection, item);
+      }
+      saveState();
+      closeModal();
+      toast(t('saved'));
+    }
+
+    function upsert(collection, item) {
+      const index = collection.findIndex(x => x.id === item.id);
+      if (index >= 0) collection[index] = item;
+      else collection.push(item);
+    }
+
+    function deleteItem(type, id) {
+      const collection = getCollection(type);
+      const index = collection.findIndex(x => x.id === id);
+      if (index >= 0) collection.splice(index, 1);
+      saveState();
+      toast(t('deleted'));
+    }
+
+    function toggleHomework(id) {
+      const item = state.homework.find(x => x.id === id);
+      if (item) item.done = !item.done;
+      saveState();
+      toast(t('completedMsg'));
+    }
+
+    function setTimerMode(mode) {
+      timer.mode = mode;
+      const minutes = mode === 'focus' ? state.timer.focus : mode === 'short' ? state.timer.short : state.timer.long;
+      timer.remaining = minutes * 60;
+      timer.total = minutes * 60;
+      timer.running = false;
+      clearInterval(timer.interval);
+      renderTimer();
+    }
+
+    function startTimer() {
+      if (timer.running) return;
+      timer.running = true;
+      timer.expectedEnd = Date.now() + timer.remaining * 1000;
+      timer.interval = setInterval(() => {
+        timer.remaining = Math.max(0, Math.ceil((timer.expectedEnd - Date.now()) / 1000));
+        if (timer.remaining <= 0) finishTimer();
+        renderTimer();
+      }, 250);
+      renderTimer();
+    }
+
+    function pauseTimer() {
+      timer.running = false;
+      clearInterval(timer.interval);
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      setTimerMode(timer.mode);
+    }
+
+    function finishTimer() {
+      clearInterval(timer.interval);
+      timer.running = false;
+      if (timer.mode === 'focus') {
+        const minutes = Math.round(timer.total / 60);
+        const key = todayKey();
+        state.stats.totalMinutes = (state.stats.totalMinutes || 0) + minutes;
+        state.stats.sessions = (state.stats.sessions || 0) + 1;
+        state.stats.byDate[key] = (state.stats.byDate[key] || 0) + minutes;
+        saveState();
+      }
+      toast(t('timerDone'));
+      setTimerMode(timer.mode === 'focus' ? 'short' : 'focus');
+    }
+
+    function saveTimerSettings() {
+      state.timer.focus = clamp(parseInt($('#focusMinutes').value, 10), 1, 180);
+      state.timer.short = clamp(parseInt($('#shortMinutes').value, 10), 1, 60);
+      state.timer.long = clamp(parseInt($('#longMinutes').value, 10), 1, 90);
+      saveState();
+      setTimerMode(timer.mode);
+      toast(t('timerSaved'));
+    }
+
+    function clamp(value, min, max) {
+      if (Number.isNaN(value)) return min;
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function updateClock() {
+      const now = new Date();
+      $('#clockTime').textContent = new Intl.DateTimeFormat(state.language === 'ru' ? 'ru-RU' : 'en-US', { hour: '2-digit', minute: '2-digit' }).format(now);
+      $('#clockDate').textContent = new Intl.DateTimeFormat(state.language === 'ru' ? 'ru-RU' : 'en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).format(now);
+      $('#timezoneLabel').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    }
+
+    function checkReminders() {
+      const now = Date.now();
+      state.reminders.forEach(item => {
+        const time = new Date(item.at).getTime();
+        if (time && time <= now && !item.notified) {
+          item.notified = true;
+          toast(item.title);
+          if ('Notification' in window && Notification.permission === 'granted') new Notification('Study Planner', { body: item.title });
+        }
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function toast(message) {
+      const wrap = $('#toast');
+      const el = document.createElement('div');
+      el.className = 'toast-item';
+      el.textContent = message;
+      wrap.appendChild(el);
+      setTimeout(() => el.remove(), 3200);
+    }
+
+    function exportData() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `study-planner-${todayKey()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast(t('exported'));
+    }
+
+    function importData(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const next = JSON.parse(reader.result);
+          state = { ...structuredClone(defaultState), ...next, timer: { ...defaultState.timer, ...(next.timer || {}) }, stats: { ...defaultState.stats, ...(next.stats || {}) } };
+          saveState();
+          setLanguage(state.language || 'en');
+          toast(t('imported'));
+        } catch {
+          toast(t('invalidImport'));
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function initEvents() {
+      $$('.nav-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+      $$('[data-tab-open]').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tabOpen)));
+      $$('[data-modal]').forEach(btn => btn.addEventListener('click', () => openModal(btn.dataset.modal)));
+      $('[data-tab-link="home"]').addEventListener('click', e => { e.preventDefault(); switchTab('home'); });
+      $('#menuToggle').addEventListener('click', () => $('#nav').classList.toggle('open'));
+      $('#languageToggle').addEventListener('click', () => setLanguage(state.language === 'en' ? 'ru' : 'en'));
+      $('#languageSelect').addEventListener('change', e => setLanguage(e.target.value));
+      $('#modalForm').addEventListener('submit', handleModalSubmit);
+      $('#closeModal').addEventListener('click', closeModal);
+      $('#modalBackdrop').addEventListener('click', e => { if (e.target.id === 'modalBackdrop') closeModal(); });
+      $('#homeworkSearch').addEventListener('input', renderHomework);
+      $('#homeworkFilter').addEventListener('change', renderHomework);
+      $('#notesSearch').addEventListener('input', renderNotes);
+      $$('[data-mode]').forEach(btn => btn.addEventListener('click', () => setTimerMode(btn.dataset.mode)));
+      $('#timerStart').addEventListener('click', startTimer);
+      $('#timerPause').addEventListener('click', pauseTimer);
+      $('#timerReset').addEventListener('click', resetTimer);
+      $('#saveTimerSettings').addEventListener('click', saveTimerSettings);
+      $('#clearData').addEventListener('click', () => { if (confirm(t('confirmClear'))) { state = structuredClone(defaultState); saveState(); setLanguage('en'); toast(t('dataCleared')); } });
+      $('#exportData').addEventListener('click', exportData);
+      $('#importFile').addEventListener('change', e => { if (e.target.files[0]) importData(e.target.files[0]); });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+    }
+
+    function initNotifications() {
+      if ('Notification' in window && Notification.permission === 'default') {
+        setTimeout(() => Notification.requestPermission().catch(() => {}), 1800);
+      }
+    }
+
+    function init() {
+      initEvents();
+      setLanguage(state.language || 'en');
+      setTimerMode('focus');
+      updateClock();
+      renderAll();
+      initNotifications();
+      const initial = location.hash.replace('#', '');
+      if (initial && document.getElementById(initial)) switchTab(initial);
+      setInterval(updateClock, 1000);
+      setInterval(checkReminders, 30000);
+    }
+
+    init();
+
+    window.openModal = openModal;
+    window.closeModal = closeModal;
+    window.deleteItem = deleteItem;
+    window.toggleHomework = toggleHomework;
+  </script>
+</body>
+</html>
