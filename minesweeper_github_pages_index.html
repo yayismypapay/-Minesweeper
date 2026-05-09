@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minesweeper — Dark Edition</title>
+  <style>
+    :root {
+      --bg: #050505;
+      --panel: #0d0d0f;
+      --panel-soft: #151519;
+      --cell: #1c1c22;
+      --cell-hover: #292933;
+      --text: #f4f4f5;
+      --muted: #a1a1aa;
+      --line: rgba(255, 255, 255, 0.08);
+      --accent: #8b5cf6;
+      --accent-2: #22c55e;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --shadow: 0 25px 80px rgba(0, 0, 0, 0.55);
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(139, 92, 246, 0.22), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.14), transparent 28%),
+        var(--bg);
+      overflow-x: hidden;
+    }
+
+    button, select {
+      font: inherit;
+    }
+
+    .app {
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 24px 0 42px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #8b5cf6, #22c55e);
+      box-shadow: 0 16px 45px rgba(139, 92, 246, 0.28);
+      font-size: 24px;
+    }
+
+    h1 {
+      font-size: clamp(24px, 4vw, 42px);
+      line-height: 1.04;
+      letter-spacing: -0.05em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-top: 5px;
+      font-size: 14px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill-btn, .select {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.045);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 11px 15px;
+      cursor: pointer;
+      transition: 0.22s ease;
+      backdrop-filter: blur(14px);
+    }
+
+    .pill-btn:hover, .select:hover {
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.075);
+    }
+
+    .select option {
+      background: #111;
+      color: white;
+    }
+
+    .hero {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,0.065), rgba(255,255,255,0.025));
+      box-shadow: var(--shadow);
+      padding: 18px;
+      overflow: hidden;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      padding: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      width: fit-content;
+      margin-bottom: 18px;
+    }
+
+    .tab {
+      border: none;
+      color: var(--muted);
+      background: transparent;
+      padding: 12px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: 0.25s ease;
+    }
+
+    .tab.active {
+      color: #fff;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.95), rgba(34, 197, 94, 0.78));
+      box-shadow: 0 10px 32px rgba(139, 92, 246, 0.24);
+    }
+
+    .view {
+      display: none;
+      animation: fadeIn 0.35s ease both;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .game-layout {
+      display: grid;
+      grid-template-columns: 330px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(10, 10, 12, 0.7);
+      padding: 18px;
+      backdrop-filter: blur(16px);
+    }
+
+    .card h2, .card h3 {
+      letter-spacing: -0.03em;
+      margin-bottom: 10px;
+    }
+
+    .small-text {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 13px;
+      background: rgba(255,255,255,0.035);
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .stat strong {
+      font-size: 24px;
+    }
+
+    .controls {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .primary-btn {
+      border: none;
+      border-radius: 18px;
+      color: white;
+      cursor: pointer;
+      padding: 14px 16px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #8b5cf6, #22c55e);
+      box-shadow: 0 16px 36px rgba(139, 92, 246, 0.22);
+      transition: 0.22s ease;
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.08);
+    }
+
+    .secondary-btn {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      border-radius: 18px;
+      cursor: pointer;
+      padding: 13px 16px;
+      transition: 0.22s ease;
+    }
+
+    .secondary-btn:hover {
+      background: rgba(255,255,255,0.08);
+    }
+
+    .hint-box {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      background: rgba(139, 92, 246, 0.08);
+      color: #ddd6fe;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .board-wrap {
+      display: flex;
+      justify-content: center;
+      overflow: auto;
+      padding: 8px;
+    }
+
+    .board {
+      display: grid;
+      gap: 7px;
+      width: fit-content;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .cell {
+      width: clamp(34px, 6.7vw, 48px);
+      height: clamp(34px, 6.7vw, 48px);
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 13px;
+      background: linear-gradient(180deg, #23232b, #17171d);
+      color: white;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform 0.12s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 24px rgba(0,0,0,0.22);
+    }
+
+    .cell:hover {
+      transform: translateY(-1px);
+      background: linear-gradient(180deg, #30303a, #202027);
+      border-color: rgba(255,255,255,0.16);
+    }
+
+    .cell.open {
+      cursor: default;
+      transform: none;
+      background: rgba(255,255,255,0.055);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+    }
+
+    .cell.flagged {
+      background: rgba(245, 158, 11, 0.16);
+      border-color: rgba(245, 158, 11, 0.32);
+    }
+
+    .cell.mine {
+      background: rgba(239, 68, 68, 0.16);
+      border-color: rgba(239, 68, 68, 0.4);
+      animation: pop 0.25s ease both;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.88); }
+      70% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
+    .n1 { color: #60a5fa; }
+    .n2 { color: #34d399; }
+    .n3 { color: #f87171; }
+    .n4 { color: #a78bfa; }
+    .n5 { color: #fbbf24; }
+    .n6 { color: #22d3ee; }
+    .n7 { color: #e879f9; }
+    .n8 { color: #f8fafc; }
+
+    .status {
+      margin: 0 0 14px;
+      padding: 15px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .status strong {
+      color: var(--text);
+    }
+
+    .tutorial-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .lesson {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(255,255,255,0.04);
+      padding: 18px;
+      min-height: 190px;
+      transition: 0.24s ease;
+    }
+
+    .lesson:hover {
+      transform: translateY(-3px);
+      border-color: rgba(139, 92, 246, 0.35);
+      background: rgba(255,255,255,0.065);
+    }
+
+    .lesson-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      background: rgba(139, 92, 246, 0.16);
+      margin-bottom: 12px;
+      font-size: 22px;
+    }
+
+    .lesson h3 {
+      margin-bottom: 8px;
+    }
+
+    .lesson p, .lesson li {
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    .lesson ul {
+      padding-left: 18px;
+      margin-top: 8px;
+    }
+
+    .wide {
+      grid-column: span 3;
+    }
+
+    .example-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .mini-cell {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--line);
+    }
+
+    footer {
+      margin-top: 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 860px) {
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .top-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .game-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .tutorial-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .wide {
+        grid-column: span 1;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .app {
+        width: min(100% - 18px, 1180px);
+        padding-top: 14px;
+      }
+
+      .hero, .card {
+        padding: 14px;
+      }
+
+      .tabs {
+        width: 100%;
+      }
+
+      .tab {
+        flex: 1;
+        padding: 11px 10px;
+      }
+
+      .board {
+        gap: 5px;
+      }
+
+      .cell {
+        border-radius: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="brand">
+        <div class="logo">💣</div>
+        <div>
+          <h1 data-i18n="title">Minesweeper</h1>
+          <p class="subtitle" data-i18n="subtitle">A calm dark version with beginner-friendly tutorial.</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <select id="language" class="select" aria-label="Language">
+          <option value="en">English</option>
+          <option value="ru">Русский</option>
+        </select>
+      </div>
+    </header>
+
+    <section class="hero">
+      <nav class="tabs" aria-label="Main menu">
+        <button class="tab active" data-tab="game" data-i18n="tabGame">Game</button>
+        <button class="tab" data-tab="tutorial" data-i18n="tabTutorial">Tutorial</button>
+      </nav>
+
+      <section id="game" class="view active">
+        <div class="game-layout">
+          <aside class="card">
+            <h2 data-i18n="gameTitle">Beginner board</h2>
+            <p class="small-text" data-i18n="gameDesc">Open safe cells, place flags on mines, and try to clear the board.</p>
+
+            <div class="stats">
+              <div class="stat">
+                <span data-i18n="minesLabel">Mines</span>
+                <strong id="mineCount">10</strong>
+              </div>
+              <div class="stat">
+                <span data-i18n="flagsLabel">Flags</span>
+                <strong id="flagCount">0</strong>
+              </div>
+              <div class="stat">
+                <span data-i18n="timeLabel">Time</span>
+                <strong id="timer">0</strong>
+              </div>
+              <div class="stat">
+                <span data-i18n="levelLabel">Level</span>
+                <strong data-i18n="easyLabel">Easy</strong>
+              </div>
+            </div>
+
+            <div class="controls">
+              <button id="newGame" class="primary-btn" data-i18n="newGame">New game</button>
+              <button id="flagMode" class="secondary-btn" data-i18n="flagModeOff">Flag mode: OFF</button>
+            </div>
+
+            <div class="hint-box" data-i18n="mobileHint">Tip: left click opens a cell. Right click places a flag. On phone, turn on Flag mode to place flags.</div>
+          </aside>
+
+          <section class="card">
+            <div id="status" class="status"><strong data-i18n="statusReadyStrong">Ready.</strong> <span data-i18n="statusReady">Open any cell to start.</span></div>
+            <div class="board-wrap">
+              <div id="board" class="board" aria-label="Minesweeper board"></div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="tutorial" class="view">
+        <div class="tutorial-grid">
+          <article class="lesson">
+            <div class="lesson-icon">🎯</div>
+            <h3 data-i18n="lesson1Title">Goal</h3>
+            <p data-i18n="lesson1Text">Your goal is to open all safe cells without clicking on a mine. Mines stay hidden until you make a mistake or win.</p>
+          </article>
+
+          <article class="lesson">
+            <div class="lesson-icon">🔢</div>
+            <h3 data-i18n="lesson2Title">Numbers</h3>
+            <p data-i18n="lesson2Text">A number shows how many mines touch that cell. Touching means around it: left, right, top, bottom, and diagonals.</p>
+            <div class="example-row">
+              <div class="mini-cell n1">1</div>
+              <div class="mini-cell n2">2</div>
+              <div class="mini-cell n3">3</div>
+            </div>
+          </article>
+
+          <article class="lesson">
+            <div class="lesson-icon">🚩</div>
+            <h3 data-i18n="lesson3Title">Flags</h3>
+            <p data-i18n="lesson3Text">If you think a cell has a mine, mark it with a flag. Flags help you remember dangerous cells.</p>
+          </article>
+
+          <article class="lesson wide">
+            <div class="lesson-icon">🧠</div>
+            <h3 data-i18n="lesson4Title">Simple beginner strategy</h3>
+            <ul>
+              <li data-i18n="tip1">Start by opening a random cell. The first click is always safe in this version.</li>
+              <li data-i18n="tip2">If a cell shows 1 and only one closed cell touches it, that closed cell is probably a mine. Flag it.</li>
+              <li data-i18n="tip3">If the number already has enough flags around it, the other nearby closed cells are safe.</li>
+              <li data-i18n="tip4">Do not guess too fast. Look at several numbers together.</li>
+            </ul>
+          </article>
+
+          <article class="lesson wide">
+            <div class="lesson-icon">🕹️</div>
+            <h3 data-i18n="lesson5Title">Controls</h3>
+            <p data-i18n="lesson5Text">Computer: left click to open, right click to flag. Phone/tablet: use Flag mode, then tap cells to place or remove flags.</p>
+          </article>
+        </div>
+      </section>
+    </section>
+
+    <footer data-i18n="footer">Built for GitHub Pages • No installation needed</footer>
+  </main>
+
+  <script>
+    const translations = {
+      en: {
+        title: "Minesweeper",
+        subtitle: "A calm dark version with beginner-friendly tutorial.",
+        tabGame: "Game",
+        tabTutorial: "Tutorial",
+        gameTitle: "Beginner board",
+        gameDesc: "Open safe cells, place flags on mines, and try to clear the board.",
+        minesLabel: "Mines",
+        flagsLabel: "Flags",
+        timeLabel: "Time",
+        levelLabel: "Level",
+        easyLabel: "Easy",
+        newGame: "New game",
+        flagModeOff: "Flag mode: OFF",
+        flagModeOn: "Flag mode: ON",
+        mobileHint: "Tip: left click opens a cell. Right click places a flag. On phone, turn on Flag mode to place flags.",
+        statusReadyStrong: "Ready.",
+        statusReady: "Open any cell to start.",
+        statusPlayingStrong: "Playing.",
+        statusPlaying: "Think carefully and use flags.",
+        statusWinStrong: "You won!",
+        statusWin: "All safe cells are open. Great job!",
+        statusLoseStrong: "Boom!",
+        statusLose: "You clicked on a mine. Try again and use the tutorial tips.",
+        lesson1Title: "Goal",
+        lesson1Text: "Your goal is to open all safe cells without clicking on a mine. Mines stay hidden until you make a mistake or win.",
+        lesson2Title: "Numbers",
+        lesson2Text: "A number shows how many mines touch that cell. Touching means around it: left, right, top, bottom, and diagonals.",
+        lesson3Title: "Flags",
+        lesson3Text: "If you think a cell has a mine, mark it with a flag. Flags help you remember dangerous cells.",
+        lesson4Title: "Simple beginner strategy",
+        tip1: "Start by opening a random cell. The first click is always safe in this version.",
+        tip2: "If a cell shows 1 and only one closed cell touches it, that closed cell is probably a mine. Flag it.",
+        tip3: "If the number already has enough flags around it, the other nearby closed cells are safe.",
+        tip4: "Do not guess too fast. Look at several numbers together.",
+        lesson5Title: "Controls",
+        lesson5Text: "Computer: left click to open, right click to flag. Phone/tablet: use Flag mode, then tap cells to place or remove flags.",
+        footer: "Built for GitHub Pages • No installation needed"
+      },
+      ru: {
+        title: "Сапёр",
+        subtitle: "Спокойная тёмная версия с обучением для новичков.",
+        tabGame: "Игра",
+        tabTutorial: "Обучение",
+        gameTitle: "Поле для новичка",
+        gameDesc: "Открывай безопасные клетки, ставь флажки на мины и очисти поле.",
+        minesLabel: "Мины",
+        flagsLabel: "Флаги",
+        timeLabel: "Время",
+        levelLabel: "Уровень",
+        easyLabel: "Лёгкий",
+        newGame: "Новая игра",
+        flagModeOff: "Флаг: ВЫКЛ",
+        flagModeOn: "Флаг: ВКЛ",
+        mobileHint: "Подсказка: левый клик открывает клетку. Правый клик ставит флаг. На телефоне включи режим флага.",
+        statusReadyStrong: "Готово.",
+        statusReady: "Открой любую клетку, чтобы начать.",
+        statusPlayingStrong: "Игра идёт.",
+        statusPlaying: "Думай внимательно и используй флажки.",
+        statusWinStrong: "Ты победил!",
+        statusWin: "Все безопасные клетки открыты. Отличная работа!",
+        statusLoseStrong: "Бум!",
+        statusLose: "Ты нажал на мину. Попробуй снова и используй советы из обучения.",
+        lesson1Title: "Цель",
+        lesson1Text: "Твоя цель — открыть все безопасные клетки и не нажать на мину. Мины скрыты, пока ты не ошибёшься или не победишь.",
+        lesson2Title: "Цифры",
+        lesson2Text: "Цифра показывает, сколько мин касается этой клетки. Считаются клетки слева, справа, сверху, снизу и по диагонали.",
+        lesson3Title: "Флажки",
+        lesson3Text: "Если думаешь, что в клетке мина, поставь флаг. Флаги помогают запомнить опасные места.",
+        lesson4Title: "Простая стратегия для новичка",
+        tip1: "Начни с любой клетки. В этой версии первый клик всегда безопасный.",
+        tip2: "Если клетка показывает 1 и рядом только одна закрытая клетка, скорее всего там мина. Поставь флаг.",
+        tip3: "Если вокруг цифры уже стоит нужное количество флагов, остальные закрытые клетки рядом безопасны.",
+        tip4: "Не гадай слишком быстро. Смотри сразу на несколько цифр рядом.",
+        lesson5Title: "Управление",
+        lesson5Text: "Компьютер: левый клик — открыть, правый клик — флаг. Телефон/планшет: включи режим флага и нажимай на клетки.",
+        footer: "Сделано для GitHub Pages • Установка не нужна"
+      }
+    };
+
+    const boardEl = document.getElementById("board");
+    const mineCountEl = document.getElementById("mineCount");
+    const flagCountEl = document.getElementById("flagCount");
+    const timerEl = document.getElementById("timer");
+    const statusEl = document.getElementById("status");
+    const newGameBtn = document.getElementById("newGame");
+    const flagModeBtn = document.getElementById("flagMode");
+    const languageSelect = document.getElementById("language");
+
+    const size = 9;
+    const mineTotal = 10;
+    let cells = [];
+    let firstClick = true;
+    let gameOver = false;
+    let flags = 0;
+    let opened = 0;
+    let seconds = 0;
+    let timer = null;
+    let flagMode = false;
+    let lang = localStorage.getItem("minesweeper-lang") || "en";
+
+    languageSelect.value = lang;
+
+    function t(key) {
+      return translations[lang][key] || translations.en[key] || key;
+    }
+
+    function applyLanguage() {
+      document.documentElement.lang = lang;
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.dataset.i18n;
+        if (translations[lang][key]) el.textContent = translations[lang][key];
+      });
+      flagModeBtn.textContent = flagMode ? t("flagModeOn") : t("flagModeOff");
+      if (!gameOver && opened === 0) setStatus("statusReadyStrong", "statusReady");
+      localStorage.setItem("minesweeper-lang", lang);
+    }
+
+    function setStatus(strongKey, textKey) {
+      statusEl.innerHTML = `<strong>${t(strongKey)}</strong> ${t(textKey)}`;
+    }
+
+    function createEmptyCells() {
+      return Array.from({ length: size * size }, (_, index) => ({
+        index,
+        mine: false,
+        open: false,
+        flagged: false,
+        count: 0
+      }));
+    }
+
+    function neighbors(index) {
+      const row = Math.floor(index / size);
+      const col = index % size;
+      const list = [];
+
+      for (let r = row - 1; r <= row + 1; r++) {
+        for (let c = col - 1; c <= col + 1; c++) {
+          if (r === row && c === col) continue;
+          if (r >= 0 && r < size && c >= 0 && c < size) {
+            list.push(r * size + c);
+          }
+        }
+      }
+      return list;
+    }
+
+    function placeMines(safeIndex) {
+      let placed = 0;
+      const forbidden = new Set([safeIndex, ...neighbors(safeIndex)]);
+
+      while (placed < mineTotal) {
+        const index = Math.floor(Math.random() * cells.length);
+        if (!cells[index].mine && !forbidden.has(index)) {
+          cells[index].mine = true;
+          placed++;
+        }
+      }
+
+      cells.forEach(cell => {
+        cell.count = neighbors(cell.index).filter(i => cells[i].mine).length;
+      });
+    }
+
+    function renderBoard() {
+      boardEl.innerHTML = "";
+      boardEl.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+
+      cells.forEach(cell => {
+        const btn = document.createElement("button");
+        btn.className = "cell";
+        btn.setAttribute("aria-label", `cell ${cell.index + 1}`);
+
+        if (cell.open) {
+          btn.classList.add("open");
+          if (cell.mine) {
+            btn.classList.add("mine");
+            btn.textContent = "💣";
+          } else if (cell.count > 0) {
+            btn.classList.add(`n${cell.count}`);
+            btn.textContent = cell.count;
+          }
+        } else if (cell.flagged) {
+          btn.classList.add("flagged");
+          btn.textContent = "🚩";
+        }
+
+        btn.addEventListener("click", () => {
+          if (flagMode) toggleFlag(cell.index);
+          else openCell(cell.index);
+        });
+
+        btn.addEventListener("contextmenu", event => {
+          event.preventDefault();
+          toggleFlag(cell.index);
+        });
+
+        boardEl.appendChild(btn);
+      });
+
+      mineCountEl.textContent = mineTotal;
+      flagCountEl.textContent = flags;
+    }
+
+    function startTimer() {
+      if (timer) return;
+      timer = setInterval(() => {
+        seconds++;
+        timerEl.textContent = seconds;
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(timer);
+      timer = null;
+    }
+
+    function openCell(index) {
+      const cell = cells[index];
+      if (gameOver || cell.open || cell.flagged) return;
+
+      if (firstClick) {
+        placeMines(index);
+        firstClick = false;
+        startTimer();
+        setStatus("statusPlayingStrong", "statusPlaying");
+      }
+
+      cell.open = true;
+      opened++;
+
+      if (cell.mine) {
+        loseGame();
+        return;
+      }
+
+      if (cell.count === 0) {
+        neighbors(index).forEach(i => {
+          if (!cells[i].open && !cells[i].flagged) openCell(i);
+        });
+      }
+
+      checkWin();
+      renderBoard();
+    }
+
+    function toggleFlag(index) {
+      const cell = cells[index];
+      if (gameOver || cell.open) return;
+      if (!cell.flagged && flags >= mineTotal) return;
+      cell.flagged = !cell.flagged;
+      flags += cell.flagged ? 1 : -1;
+      renderBoard();
+    }
+
+    function loseGame() {
+      gameOver = true;
+      stopTimer();
+      cells.forEach(cell => {
+        if (cell.mine) cell.open = true;
+      });
+      setStatus("statusLoseStrong", "statusLose");
+      renderBoard();
+    }
+
+    function checkWin() {
+      const safeCells = size * size - mineTotal;
+      if (opened >= safeCells) {
+        gameOver = true;
+        stopTimer();
+        cells.forEach(cell => {
+          if (cell.mine) cell.flagged = true;
+        });
+        flags = mineTotal;
+        setStatus("statusWinStrong", "statusWin");
+      }
+    }
+
+    function newGame() {
+      cells = createEmptyCells();
+      firstClick = true;
+      gameOver = false;
+      flags = 0;
+      opened = 0;
+      seconds = 0;
+      timerEl.textContent = seconds;
+      stopTimer();
+      setStatus("statusReadyStrong", "statusReady");
+      renderBoard();
+    }
+
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll(".view").forEach(view => view.classList.remove("active"));
+        tab.classList.add("active");
+        document.getElementById(tab.dataset.tab).classList.add("active");
+      });
+    });
+
+    newGameBtn.addEventListener("click", newGame);
+
+    flagModeBtn.addEventListener("click", () => {
+      flagMode = !flagMode;
+      flagModeBtn.textContent = flagMode ? t("flagModeOn") : t("flagModeOff");
+    });
+
+    languageSelect.addEventListener("change", event => {
+      lang = event.target.value;
+      applyLanguage();
+    });
+
+    applyLanguage();
+    newGame();
+  </script>
+</body>
+</html>
