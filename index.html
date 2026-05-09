@@ -71,7 +71,7 @@
     .topbar {
       min-height: 74px;
       display: grid;
-      grid-template-columns: 1fr auto 1fr;
+      grid-template-columns: 1fr auto;
       align-items: center;
       gap: 16px;
       border: 1px solid var(--line);
@@ -129,31 +129,7 @@
     }
 
     .brand-text p {
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 5px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .menu-title {
-      justify-self: center;
-      text-align: center;
-    }
-
-    .menu-title span {
-      display: block;
-      color: var(--muted);
-      font-size: 12px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
-
-    .menu-title strong {
-      font-size: 20px;
-      letter-spacing: -0.03em;
+      display: none;
     }
 
     .clock-box {
@@ -196,6 +172,29 @@
       padding: 18px;
       border-bottom: 1px solid var(--line);
       background: rgba(0,0,0,0.32);
+      transition: 0.28s ease;
+    }
+
+    .start-mode {
+      min-height: min(560px, calc(100vh - 150px));
+      display: grid;
+      place-items: center;
+    }
+
+    .start-mode .menu-panel {
+      width: 100%;
+      border-bottom: 0;
+      background: transparent;
+      padding: clamp(34px, 8vw, 80px) 18px;
+    }
+
+    .start-mode .tabs {
+      width: min(560px, 100%);
+    }
+
+    .start-mode .tab {
+      padding: clamp(18px, 4vw, 28px) 18px;
+      font-size: clamp(17px, 3vw, 24px);
     }
 
     .tabs-wrap {
@@ -544,15 +543,12 @@
         grid-template-columns: 1fr;
         justify-items: center;
         text-align: center;
+        gap: 12px;
       }
 
       .brand,
       .clock-box {
         justify-self: center;
-      }
-
-      .brand-text p {
-        white-space: normal;
       }
 
       .game-layout {
@@ -570,33 +566,82 @@
 
     @media (max-width: 480px) {
       .app {
-        width: min(100% - 18px, 1180px);
-        padding-top: 12px;
+        width: min(100% - 14px, 1180px);
+        padding-top: 10px;
       }
 
       .topbar,
       .shell,
       .card,
       .lesson {
-        border-radius: 20px;
+        border-radius: 18px;
+      }
+
+      .topbar {
+        padding: 13px;
+      }
+
+      .mark {
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
       }
 
       .view,
       .menu-panel,
       .card {
-        padding: 14px;
+        padding: 12px;
+      }
+
+      .tabs {
+        width: 100%;
       }
 
       .tab {
-        padding: 12px 10px;
+        padding: 12px 8px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .stat {
+        padding: 11px;
+      }
+
+      .stat strong {
+        font-size: 21px;
+      }
+
+      .board-wrap {
+        padding: 4px;
       }
 
       .board {
-        gap: 5px;
+        gap: 4px;
       }
 
       .cell {
-        border-radius: 10px;
+        width: min(9.2vw, 40px);
+        height: min(9.2vw, 40px);
+        min-width: 29px;
+        min-height: 29px;
+        border-radius: 8px;
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .cell {
+        width: 8.9vw;
+        height: 8.9vw;
+        min-width: 27px;
+        min-height: 27px;
+      }
+
+      .board {
+        gap: 3px;
       }
     }
   </style>
@@ -608,14 +653,11 @@
         <div class="mark" aria-hidden="true"></div>
         <div class="brand-text">
           <h1 data-i18n="title">Minesweeper</h1>
-          <p data-i18n="subtitle">Dark classic puzzle game</p>
+          
         </div>
       </div>
 
-      <div class="menu-title">
-        <span data-i18n="menuSmall">Menu</span>
-        <strong data-i18n="menuTitle">Choose section</strong>
-      </div>
+      <div></div>
 
       <div class="clock-box" aria-label="Current time">
         <span class="clock-dot" aria-hidden="true"></span>
@@ -623,17 +665,17 @@
       </div>
     </header>
 
-    <section class="shell">
+    <section class="shell start-mode" id="shell">
       <div class="menu-panel">
         <div class="tabs-wrap">
           <nav class="tabs" aria-label="Main menu">
-            <button class="tab active" data-tab="game" data-i18n="tabGame">Game</button>
+            <button class="tab" data-tab="game" data-i18n="tabGame">Game</button>
             <button class="tab" data-tab="tutorial" data-i18n="tabTutorial">Tutorial</button>
           </nav>
         </div>
       </div>
 
-      <section id="game" class="view active">
+      <section id="game" class="view">
         <div class="game-layout">
           <aside class="card">
             <h2 data-i18n="gameTitle">Beginner board</h2>
@@ -743,9 +785,7 @@
     const translations = {
       en: {
         title: "Minesweeper",
-        subtitle: "Dark classic puzzle game",
-        menuSmall: "Menu",
-        menuTitle: "Choose section",
+        
         tabGame: "Game",
         tabTutorial: "Tutorial",
         gameTitle: "Beginner board",
@@ -787,9 +827,7 @@
       },
       ru: {
         title: "Сапёр",
-        subtitle: "Классическая игра в тёмном стиле",
-        menuSmall: "Меню",
-        menuTitle: "Выбери раздел",
+        
         tabGame: "Игра",
         tabTutorial: "Обучение",
         gameTitle: "Поле для новичка",
@@ -1088,6 +1126,7 @@
         document.querySelectorAll(".view").forEach(view => view.classList.remove("active"));
         tab.classList.add("active");
         document.getElementById(tab.dataset.tab).classList.add("active");
+        document.getElementById("shell").classList.remove("start-mode");
       });
     });
 
@@ -1110,3 +1149,4 @@
     newGame();
   </script>
 </body>
+</html>
