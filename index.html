@@ -933,6 +933,53 @@
     }
 
     .footer { display: none !important; }
+  
+
+    .welcome-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 160;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,.08), transparent 28rem),
+        rgba(5,5,5,.96);
+      backdrop-filter: blur(18px);
+    }
+
+    .welcome-backdrop.show { display: flex; }
+
+    .welcome-card {
+      width: min(100%, 460px);
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.018));
+      box-shadow: var(--shadow);
+      padding: 26px;
+      animation: modalIn .24s var(--ease) both;
+    }
+
+    .welcome-card h2 {
+      margin: 12px 0 8px;
+      font-size: clamp(30px, 8vw, 44px);
+      line-height: .96;
+      letter-spacing: -.05em;
+    }
+
+    .welcome-card p {
+      margin: 0 0 18px;
+      color: var(--muted);
+    }
+
+    .welcome-actions {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .welcome-actions button { width: 100%; }
   </style>
 </head>
 <body class="app-mode">
@@ -1229,6 +1276,19 @@
 
   <div class="toast" id="toast"></div>
 
+  <div class="welcome-backdrop" id="welcomeBackdrop" aria-hidden="true">
+    <div class="welcome-card" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle">
+      <span class="eyebrow" data-i18n="welcomeEyebrow">Welcome</span>
+      <h2 id="welcomeTitle" data-i18n="welcomeTitle">Start with Learn Dock</h2>
+      <p data-i18n="welcomeText">Create an account, sign in, or continue without an account.</p>
+      <div class="welcome-actions">
+        <button class="primary-btn" id="welcomeCreateAccount" data-i18n="createAccount">Create account</button>
+        <button class="ghost-btn" id="welcomeSignIn" data-i18n="signIn">Sign in</button>
+        <button class="ghost-btn" id="welcomeGuest" data-i18n="continueWithoutAccount">Continue without account</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
     import {
@@ -1257,7 +1317,7 @@
 
     const i18n = {
       en: {
-        tagline: 'Plan better. Study calmly.', account: 'Account', signIn: 'Sign in', createAccount: 'Create account', resetPassword: 'Reset password', sendResetLink: 'Send reset link', signOut: 'Sign out', email: 'Email', password: 'Password', guestStatus: 'You are using Learn Dock without an account.', signedInStatus: 'Signed in as', guestModeNote: 'You can continue without an account.', accountLocalNote: 'Your study data remains stored on this device. Cloud sync can be added later.', authSuccess: 'Account connected', authSignedOut: 'Signed out', resetLinkSent: 'Password reset link sent', authError: 'Account action failed', navHome: 'Home', navSchedule: 'Schedule', navHomework: 'Homework', navNotes: 'Notes', navPomodoro: 'Pomodoro', navReminders: 'Reminders', navStats: 'Stats', navSettings: 'Settings',
+        tagline: 'Plan better. Study calmly.', account: 'Account', signIn: 'Sign in', createAccount: 'Create account', resetPassword: 'Reset password', sendResetLink: 'Send reset link', signOut: 'Sign out', email: 'Email', password: 'Password', guestStatus: 'You are using Learn Dock without an account.', signedInStatus: 'Signed in as', guestModeNote: 'You can continue without an account.', accountLocalNote: 'Your study data remains stored on this device. Cloud sync can be added later.', welcomeEyebrow: 'Welcome', welcomeTitle: 'Start with Learn Dock', welcomeText: 'Create an account, sign in, or continue without an account.', continueWithoutAccount: 'Continue without account', authSuccess: 'Account connected', authSignedOut: 'Signed out', resetLinkSent: 'Password reset link sent', authError: 'Account action failed', navHome: 'Home', navSchedule: 'Schedule', navHomework: 'Homework', navNotes: 'Notes', navPomodoro: 'Pomodoro', navReminders: 'Reminders', navStats: 'Stats', navSettings: 'Settings',
         heroEyebrow: 'Ready to study', heroTitle: 'What do you want to do today?', heroText: 'Choose a tool and keep your study day clear, focused, and organized.', scheduleCardText: 'Plan your week', homeworkCardText: 'Track tasks', notesCardText: 'Save ideas', pomodoroCardText: 'Focus timer', remindersCardText: 'Do not miss deadlines', statsCardText: 'See progress', timeInApp: 'Time in app', startPlanning: 'Start planning', startTimer: 'Start focus timer', today: 'Today', todayFocus: 'Focus today', pendingHomework: 'Homework', activeReminders: 'Reminders',
         scheduleTitle: 'Weekly schedule', scheduleText: 'Add lessons, self-study blocks, practice sessions, or personal tasks for each day.', addBlock: 'Add block',
         homeworkTitle: 'Homework', homeworkText: 'Keep tasks visible and mark them done when finished.', addHomework: 'Add homework', searchHomework: 'Search homework', filterAll: 'All', filterOpen: 'Open', filterDone: 'Done',
@@ -1269,7 +1329,7 @@
         noItems: 'Nothing here yet.', subject: 'Subject or task', day: 'Day', startTime: 'Start time', endTime: 'End time', description: 'Description', save: 'Save', cancel: 'Cancel', title: 'Title', dueDate: 'Due date', priority: 'Priority', low: 'Low', medium: 'Medium', high: 'High', content: 'Content', reminderAt: 'Reminder time', edit: 'Edit', delete: 'Delete', done: 'Done', reopen: 'Reopen', saved: 'Saved', deleted: 'Deleted', completedMsg: 'Completed', dataCleared: 'All data cleared', imported: 'Data imported', exported: 'Data exported', confirmClear: 'Delete all Learn Dock data from this device?', confirmStats: 'Reset all focus statistics?', invalidImport: 'Could not import this file', timerDone: 'Session finished', timerSaved: 'Timer settings saved', required: 'Please fill in required fields', scheduleEmpty: 'No blocks', homeworkEmpty: 'No homework found.', notesEmpty: 'No notes found.', remindersEmpty: 'No reminders found.'
       },
       ru: {
-        tagline: 'Планируй лучше. Учись спокойнее.', account: 'Аккаунт', signIn: 'Войти', createAccount: 'Создать аккаунт', resetPassword: 'Сброс пароля', sendResetLink: 'Отправить ссылку', signOut: 'Выйти', email: 'Email', password: 'Пароль', guestStatus: 'Вы используете Learn Dock без аккаунта.', signedInStatus: 'Выполнен вход:', guestModeNote: 'Можно продолжить без аккаунта.', accountLocalNote: 'Учебные данные остаются на этом устройстве. Облачную синхронизацию можно добавить позже.', authSuccess: 'Аккаунт подключён', authSignedOut: 'Вы вышли из аккаунта', resetLinkSent: 'Ссылка для сброса пароля отправлена', authError: 'Не удалось выполнить действие с аккаунтом', navHome: 'Главная', navSchedule: 'Расписание', navHomework: 'Домашка', navNotes: 'Заметки', navPomodoro: 'Pomodoro', navReminders: 'Напоминания', navStats: 'Статистика', navSettings: 'Настройки',
+        tagline: 'Планируй лучше. Учись спокойнее.', account: 'Аккаунт', signIn: 'Войти', createAccount: 'Создать аккаунт', resetPassword: 'Сброс пароля', sendResetLink: 'Отправить ссылку', signOut: 'Выйти', email: 'Email', password: 'Пароль', guestStatus: 'Вы используете Learn Dock без аккаунта.', signedInStatus: 'Выполнен вход:', guestModeNote: 'Можно продолжить без аккаунта.', accountLocalNote: 'Учебные данные остаются на этом устройстве. Облачную синхронизацию можно добавить позже.', welcomeEyebrow: 'Добро пожаловать', welcomeTitle: 'Начните с Learn Dock', welcomeText: 'Создайте аккаунт, войдите или продолжите без аккаунта.', continueWithoutAccount: 'Продолжить без аккаунта', authSuccess: 'Аккаунт подключён', authSignedOut: 'Вы вышли из аккаунта', resetLinkSent: 'Ссылка для сброса пароля отправлена', authError: 'Не удалось выполнить действие с аккаунтом', navHome: 'Главная', navSchedule: 'Расписание', navHomework: 'Домашка', navNotes: 'Заметки', navPomodoro: 'Pomodoro', navReminders: 'Напоминания', navStats: 'Статистика', navSettings: 'Настройки',
         heroEyebrow: 'Готов к учебе', heroTitle: 'Что будем делать сегодня?', heroText: 'Выбери нужный инструмент и держи учебный день под контролем.', scheduleCardText: 'План недели', homeworkCardText: 'Задачи и домашка', notesCardText: 'Идеи и конспекты', pomodoroCardText: 'Таймер фокуса', remindersCardText: 'Не забыть дедлайны', statsCardText: 'Прогресс', timeInApp: 'Время в приложении', startPlanning: 'Начать планировать', startTimer: 'Запустить таймер', today: 'Сегодня', todayFocus: 'Фокус сегодня', pendingHomework: 'Домашка', activeReminders: 'Напоминания',
         scheduleTitle: 'Расписание недели', scheduleText: 'Добавляй уроки, самостоятельную подготовку, практику или личные задачи на каждый день.', addBlock: 'Добавить блок',
         homeworkTitle: 'Домашка', homeworkText: 'Держи задания перед глазами и отмечай выполненные.', addHomework: 'Добавить домашку', searchHomework: 'Поиск домашки', filterAll: 'Все', filterOpen: 'Открытые', filterDone: 'Готовые',
@@ -1732,6 +1792,40 @@
       if (navigator.vibrate) navigator.vibrate([250,120,250,120,500]);
     }
 
+    function shouldShowWelcome(user) {
+      return !user && localStorage.getItem('learnDock.welcomeChoice') !== 'guest';
+    }
+
+    function showWelcome() {
+      const welcome = $('#welcomeBackdrop');
+      if (!welcome) return;
+      welcome.classList.add('show');
+      welcome.setAttribute('aria-hidden', 'false');
+    }
+
+    function hideWelcome() {
+      const welcome = $('#welcomeBackdrop');
+      if (!welcome) return;
+      welcome.classList.remove('show');
+      welcome.setAttribute('aria-hidden', 'true');
+    }
+
+    function openAuthFromWelcome(tab) {
+      hideWelcome();
+      switchTab('settings');
+      setAuthTab(tab);
+      setTimeout(() => {
+        const target = tab === 'register' ? $('#registerEmail') : $('#signInEmail');
+        if (target) target.focus();
+      }, 120);
+    }
+
+    function continueAsGuest() {
+      localStorage.setItem('learnDock.welcomeChoice', 'guest');
+      hideWelcome();
+      toast(t('guestStatus'));
+    }
+
     function updateAuthUI(user) {
       currentUser = user;
       const signedOutPanel = $('#signedOutPanel');
@@ -1741,6 +1835,8 @@
       if (!signedOutPanel || !signedInPanel || !accountStatus) return;
 
       if (user) {
+        localStorage.removeItem('learnDock.welcomeChoice');
+        hideWelcome();
         signedOutPanel.style.display = 'none';
         signedInPanel.style.display = 'block';
         accountStatus.textContent = `${t('signedInStatus')} ${user.email}`;
@@ -1750,6 +1846,7 @@
         signedInPanel.style.display = 'none';
         accountStatus.textContent = t('guestStatus');
         if (homeAuthStrip) homeAuthStrip.style.display = 'flex';
+        if (shouldShowWelcome(user)) showWelcome();
       }
     }
 
@@ -1869,6 +1966,9 @@
       $$('.auth-tab').forEach(btn => btn.addEventListener('click', () => setAuthTab(btn.dataset.authTab)));
       $('#homeSignIn')?.addEventListener('click', () => { switchTab('settings'); setAuthTab('signin'); });
       $('#homeCreateAccount')?.addEventListener('click', () => { switchTab('settings'); setAuthTab('register'); });
+      $('#welcomeCreateAccount')?.addEventListener('click', () => openAuthFromWelcome('register'));
+      $('#welcomeSignIn')?.addEventListener('click', () => openAuthFromWelcome('signin'));
+      $('#welcomeGuest')?.addEventListener('click', continueAsGuest);
       $('#signInForm')?.addEventListener('submit', e => { e.preventDefault(); handleAuthAction('signin', $('#signInEmail').value.trim(), $('#signInPassword').value); });
       $('#registerForm')?.addEventListener('submit', e => { e.preventDefault(); handleAuthAction('register', $('#registerEmail').value.trim(), $('#registerPassword').value); });
       $('#resetForm')?.addEventListener('submit', e => { e.preventDefault(); handleAuthAction('reset', $('#resetEmail').value.trim()); });
